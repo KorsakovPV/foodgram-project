@@ -1,17 +1,13 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-
-
-User = get_user_model()
-
+from users.models import User
 
 class Product(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название продукта')
-    unit = models.CharField(max_length=255, verbose_name='Единицы измерения')
+    unit = models.CharField(max_length=64, verbose_name='Единицы измерения')
 
     def __str__(self):
-        return f'{self.title}, {self.unit}'
+        return '{title}, {unit}'.format(title=self.title, unit=self.unit)
 
 
 class Tag(models.Model):
@@ -19,7 +15,7 @@ class Tag(models.Model):
     slug = models.SlugField(verbose_name='Слаг тега')
 
     def __str__(self):
-        return f'{self.name}'
+        return '{name}'.format(name=self.name)
 
 
 class RecipeManager(models.Manager):
@@ -57,7 +53,7 @@ class Recipe(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return f'{self.name}'
+        return '{name}'.format(name=self.name)
 
 
 class Ingredient(models.Model):
@@ -69,72 +65,72 @@ class Ingredient(models.Model):
         unique_together = ('ingredient', 'amount', 'recipe')
 
     def __str__(self):
-        return f'{self.amount}'
+        return '{amount}'.format(amount=self.amount)
 
 
-# class PurchaseManager(models.Manager):
-#     def counter(self, user):
-#         try:
-#             return super().get_queryset().get(user=user).recipes.count()
-#         except ObjectDoesNotExist:
-#             return 0
-#
-#     def get_purchases_list(self, user):
-#         try:
-#             return super().get_queryset().get(user=user).recipes.all()
-#         except ObjectDoesNotExist:
-#             return []
-#
-#     def get_user_purchase(self, user):
-#         try:
-#             return super().get_queryset().get(user=user)
-#         except ObjectDoesNotExist:
-#             purchase = Purchase(user=user)
-#             purchase.save()
-#             return purchase
-#
-#
-# class Purchase(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     recipes = models.ManyToManyField(Recipe)
-#
-#     purchase = PurchaseManager()
-#
-#
-# class FavoriteManager(models.Manager):
-#     def get_favorites(self, user):
-#         try:
-#             return super().get_queryset().get(user=user).recipes.all()
-#         except ObjectDoesNotExist:
-#             return []
-#
-#     def get_tag_filtered(self, user, tags):
-#         try:
-#             recipes = super().get_queryset().get(user=user).recipes.all()
-#             if tags:
-#                 return recipes.prefetch_related(
-#                     'author', 'tags'
-#                 ).filter(
-#                     tags__slug__in=tags
-#                 ).distinct()
-#             else:
-#                 return recipes.prefetch_related(
-#                     'author', 'tags'
-#                 ).all()
-#         except ObjectDoesNotExist:
-#             return []
-#
-#     def get_user(self, user):
-#         try:
-#             return super().get_queryset().get(user=user)
-#         except ObjectDoesNotExist:
-#             favorite_user = Favorite(user=user)
-#             favorite_user.save()
-#             return favorite_user
-#
-#
-# class Favorite(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     recipes = models.ManyToManyField(Recipe)
-#
-#     favorite = FavoriteManager()
+class PurchaseManager(models.Manager):
+    def counter(self, user):
+        try:
+            return super().get_queryset().get(user=user).recipes.count()
+        except ObjectDoesNotExist:
+            return 0
+
+    def get_purchases_list(self, user):
+        try:
+            return super().get_queryset().get(user=user).recipes.all()
+        except ObjectDoesNotExist:
+            return []
+
+    def get_user_purchase(self, user):
+        try:
+            return super().get_queryset().get(user=user)
+        except ObjectDoesNotExist:
+            purchase = Purchase(user=user)
+            purchase.save()
+            return purchase
+
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ManyToManyField(Recipe)
+
+    purchase = PurchaseManager()
+
+
+class FavoriteManager(models.Manager):
+    def get_favorites(self, user):
+        try:
+            return super().get_queryset().get(user=user).recipes.all()
+        except ObjectDoesNotExist:
+            return []
+
+    def get_tag_filtered(self, user, tags):
+        try:
+            recipes = super().get_queryset().get(user=user).recipes.all()
+            if tags:
+                return recipes.prefetch_related(
+                    'author', 'tags'
+                ).filter(
+                    tags__slug__in=tags
+                ).distinct()
+            else:
+                return recipes.prefetch_related(
+                    'author', 'tags'
+                ).all()
+        except ObjectDoesNotExist:
+            return []
+
+    def get_user(self, user):
+        try:
+            return super().get_queryset().get(user=user)
+        except ObjectDoesNotExist:
+            favorite_user = Favorite(user=user)
+            favorite_user.save()
+            return favorite_user
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ManyToManyField(Recipe)
+
+    favorite = FavoriteManager()

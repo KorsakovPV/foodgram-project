@@ -1,10 +1,10 @@
 from django.urls import path
 
-from . import views
+from recipes import views
 
 
-# urlpatterns = [
-#     path('', views.index, name='index'),
+urlpatterns = [
+    path('', views.index, name='index'),
 #     path('profile/<int:user_id>', views.profile, name='profile'),
 #     path('favorites', views.FavoriteView.as_view(), name='favorite'),
 #     path('favorites/<int:recipe_id>', views.delete_favorite,
@@ -25,4 +25,4 @@ from . import views
 #          name='delete_purchase'),
 #     path('shoplist', views.send_shop_list, name='shop-list'),
 #     path('ingredients', views.get_ingredients, name='ingredients'),
-# ]
+]
