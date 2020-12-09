@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import (require_GET, require_http_methods,
                                           require_POST)
+from django.contrib.auth.decorators import login_required
 from recipes.models import Recipe, Tag, Purchase, Favorite
 
 
@@ -12,6 +13,8 @@ def _extend_context(context, user):
     return context
 
 @require_GET
+#TODO убрать
+# @login_required(login_url='login')
 def index(request):
     # tags = request.GET.getlist('tag')
     # recipe_list = Recipe.recipes.tag_filter(tags)
@@ -28,4 +31,5 @@ def index(request):
     #     context['active'] = 'recipe'
     #     _extend_context(context, user)
     # return render(request, 'index.html', context)
-    return HttpResponse('0\n')#)#.join(output))
+    # return HttpResponse('0\n')#)#.join(output))
+    return render(request, 'recipes/index.html', context={'username': request.user.username})
