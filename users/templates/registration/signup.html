@@ -1,30 +1,6 @@
 {% extends "base.html" %}
-<!doctype html>
-<html lang="en">
-{% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Регистрация</title>
-    <link rel="stylesheet" href="{% static './pages/form.css' %}">
-</head>
-<body class="body">
-<header class="header">
-    <nav class="nav">
-        <div class="nav__container container">
-            <ul class="nav__items list">
-                <li class="nav__item nav__item_disabled"><a href="#" class="nav__link link">Рецепты</a></li>
-                <li class="nav__item nav__item_disabled"><a href="#" class="nav__link link">Список покупок</a></li>
-            </ul>
-            <ul class="nav__items list">
-                <li class="nav__item"><a href="#" class="nav__link link">Войти</a></li>
-                <li class="nav__item"><a href="#" class="button button_style_blue">Создать аккаунт</a></li>
-            </ul>
-        </div>
-    </nav>
-</header>
+{% block title %} Регистрация {% endblock %}
+{% block content %}
 <main class="main container">
     <div class="main__header">
         <h1 class="main__title">Регистрация</h1>
@@ -35,6 +11,19 @@
             {% if form.non_field_errors %}
                 <li>{{ form.non_field_errors }}</li>
             {% endif %}
+
+{#            <table>#}
+{##}
+{#                <tr>#}
+{#                  <td>{{ form.username.label_tag }}</td>#}
+{#                  <td>{{ form.username }}</td>#}
+{#                </tr>#}
+{##}
+{#                <tr>#}
+{#                  <td>{{ form.password.label_tag }}</td>#}
+{#                  <td>{{ form.password }}</td>#}
+{#                </tr>#}
+{#            </table>#}
 
             <div class="form__group">
                 <label for="id_first_name" class="form__label">Имя</label>
@@ -70,7 +59,10 @@
             <div class="form__group">
                 <label for="id_password" class="form__label">Пароль</label>
                 <div class="form__field-group">
-                    <input type="password" name="password" id="id_password" class="form__input">
+
+{#                    <input type="text" name="password" maxlength="128" required="" id="id_password">#}
+
+                    <input type="password" name="password" id="id_password" class="form__input" maxlength="128" required="">
                     {{ form.password.error }}
                     {% if form.password.errors %}
                         {% for error in form.password.errors %}
@@ -84,17 +76,5 @@
             </div>
         </form>
     </div>
-
-
 </main>
-<footer class="footer">
-    <div class="footer__container container">
-        <a href="#" class="footer__brand link">Продуктовый помощник</a>
-        <ul class="footer__items">
-            <li class="footer__item"><a href="#" class="footer__link link">Об авторе </a></li>
-            <li class="footer__item"><a href="#" class="footer__link link">Технологии</a></li>
-        </ul>
-    </div>
-</footer>
-</body>
-</html>
+{% endblock %}
