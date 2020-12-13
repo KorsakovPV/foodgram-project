@@ -12,15 +12,15 @@
 
 
 <body class="body">
+
 {% include 'nav.html' %}
 
-<main class="main container">
-    {% block content %}
-        <!-- Содержимое страницы -->
-    {% endblock content %}
+{% block content %}
 
-</main>
+{% endblock content %}
+
 {% include 'footer.html' %}
+
 </body>
 </html>
 

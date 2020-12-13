@@ -1,20 +1,24 @@
-from django.contrib.auth.forms import UserCreationForm
-from users.models import User
+from django.contrib.auth import get_user_model
 from django import forms
-from django.contrib.auth import password_validation
-from django.core.exceptions import ValidationError
+
+
+User = get_user_model()
 
 
 class CreationForm(forms.ModelForm):
+    password = forms.CharField(
+        label='Пароль',
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'})
+    )
+
     class Meta:
         model = User
         fields = ('first_name', 'username', 'email', 'password')
 
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        password_validation.validate_password(password, self.instance)
-        return password
-        # try:
-        #     password_validation.validate_password(password, self.instance)
-        # except ValidationError as error:
-        #     self.add_error()
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user

@@ -32,4 +32,4 @@ def index(request):
     #     _extend_context(context, user)
     # return render(request, 'index.html', context)
     # return HttpResponse('0\n')#)#.join(output))
-    return render(request, 'recipes/index.html', context={'username': request.user.username})
+    return render(request, 'recipes/indexAuth.html', context={'username': request.user.username})
