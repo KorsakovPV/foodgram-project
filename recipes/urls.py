@@ -13,7 +13,7 @@ urlpatterns = [
 #     path('subscriptions', views.subscription, name='subscription'),
 #     path('subscriptions/<int:author_id>', views.delete_subscription,
 #          name='delete_subscription'),
-#     path('recipes/new', views.new_recipe, name='new_recipe'),
+    path('new/', views.new_recipe, name='new_recipe'),
 #     path('recipes/<int:recipe_id>', views.recipe_detail,
 #          name='recipe'),
 #     path('recipes/<int:recipe_id>/edit', views.edit_recipe,
@@ -24,5 +24,5 @@ urlpatterns = [
 #     path('purchases/<int:recipe_id>', views.delete_purchase,
 #          name='delete_purchase'),
 #     path('shoplist', views.send_shop_list, name='shop-list'),
-#     path('ingredients', views.get_ingredients, name='ingredients'),
+    path('ingredients/', views.get_ingredients, name='ingredients'),
 ]
