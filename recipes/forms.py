@@ -13,7 +13,7 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields = ('name', 'tags', 'ingredients', 'cook_time', 'description', 'image',)
+        fields = ('name', 'tags', 'cook_time', 'description', 'image',)
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form__input'}),
             'cook_time': forms.NumberInput(

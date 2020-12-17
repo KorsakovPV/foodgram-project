@@ -43,7 +43,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, verbose_name='Теги', blank=True)
     ingredients = models.ManyToManyField(
         Product, through='Ingredient', related_name='recipe_ingredients')
-    cook_time = models.IntegerField(verbose_name='Время приготовления')
+    cook_time = models.PositiveIntegerField(verbose_name='Время приготовления')
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Время публикации', db_index=True)
 
@@ -59,7 +59,7 @@ class Recipe(models.Model):
 class Ingredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Product, on_delete=models.CASCADE)
-    amount = models.FloatField(verbose_name='Количество ингредиента')
+    amount = models.PositiveIntegerField(verbose_name='Количество ингредиента')
 
     class Meta:
         unique_together = ('ingredient', 'amount', 'recipe')

@@ -42,45 +42,55 @@ def index(request):
 # @login_required(login_url='auth/login/')
 # @require_http_methods(['GET', 'POST'])
 def new_recipe(request):
-    # form = RecipeForm(request.POST or None, files=request.FILES or None)
-    # if form.is_valid():
-    #     post = form.save(commit=False)
-    #     post.author = request.user
-    #     post.save()
-    #     return redirect('index')
-    # return render(request, 'recipes/formRecipe.html', {'form': form})
-    context = {
-        'active': 'new_recipe',
-        'page_title': 'Создание рецепта',
-        'button_label': 'Создать рецепт',
-    }
-    # GET-запрос на страницу создания рецепта
-    if request.method == 'GET':
-        form = RecipeForm()
-        context['form'] = form
-        return render(request, 'recipes/formRecipe.html', context)
-    # POST-запрос с данными из формы создания рецепта
-    elif request.method == 'POST':
-        form = RecipeForm(request.POST, files=request.FILES or None)
-        if not form.is_valid():
-            context['form'] = form
-            return render(request, 'recipes/formRecipe.html', context)
+    form = RecipeForm(request.POST or None, files=request.FILES or None)
+    if form.is_valid():
         recipe = form.save(commit=False)
         recipe.author = request.user
-        form.save()
+        recipe.save()
         ingedient_names = request.POST.getlist('nameIngredient')
         ingredient_units = request.POST.getlist('unitsIngredient')
         amounts = request.POST.getlist('valueIngredient')
-        products = [Product.objects.get(
-            title=ingedient_names[i],
-            unit=ingredient_units[i]
-        ) for i in range(len(ingedient_names))]
+        products = []
+        for i in range(len(ingedient_names)):
+            products.append(Product.objects.get(title=ingedient_names[i], unit=ingredient_units[i]))
         ingredients = []
         for i in range(len(amounts)):
-            ingredients.append(Ingredient(
-                recipe=recipe, ingredient=products[i], amount=amounts[i]))
+            ingredients.append(Ingredient(recipe=recipe, ingredient=products[i], amount=amounts[i]))
         Ingredient.objects.bulk_create(ingredients)
         return redirect('index')
+    return render(request, 'recipes/formRecipe.html', {'form': form})
+    # context = {
+    #     'active': 'new_recipe',
+    #     'page_title': 'Создание рецепта',
+    #     'button_label': 'Создать рецепт',
+    # }
+    # # GET-запрос на страницу создания рецепта
+    # if request.method == 'GET':
+    #     form = RecipeForm()
+    #     context['form'] = form
+    #     return render(request, 'recipes/formRecipe.html', context)
+    # # POST-запрос с данными из формы создания рецепта
+    # elif request.method == 'POST':
+    #     form = RecipeForm(request.POST, files=request.FILES or None)
+    #     if not form.is_valid():
+    #         context['form'] = form
+    #         return render(request, 'recipes/formRecipe.html', context)
+    #     recipe = form.save(commit=False)
+    #     recipe.author = request.user
+    #     form.save()
+    #     ingedient_names = request.POST.getlist('nameIngredient')
+    #     ingredient_units = request.POST.getlist('unitsIngredient')
+    #     amounts = request.POST.getlist('valueIngredient')
+    #     products = [Product.objects.get(
+    #         title=ingedient_names[i],
+    #         unit=ingredient_units[i]
+    #     ) for i in range(len(ingedient_names))]
+    #     ingredients = []
+    #     for i in range(len(amounts)):
+    #         ingredients.append(Ingredient(
+    #             recipe=recipe, ingredient=products[i], amount=amounts[i]))
+    #     Ingredient.objects.bulk_create(ingredients)
+    #     return redirect('index')
 
 # @login_required(login_url='auth/login/')
 # @require_GET
