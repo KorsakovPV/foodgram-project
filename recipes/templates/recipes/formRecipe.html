@@ -10,6 +10,10 @@
     <div class="main__header">
         <h1 class="main__title">{{ page_title }}</h1>
     </div>
+{#    {% for field in form %}#}
+{#             {{ field.label }}#}
+{#             {{ field }}#}
+{#    {% endfor %}#}
     <div class="form-container">
         <form enctype="multipart/form-data" class="form" action="" method="POST">
             {% csrf_token %}
@@ -18,8 +22,9 @@
                 <label for="id_name" class="form__label" required="" >Название рецепта</label>
 {#                {{ form.name.label }}#}
                 <div class="form__field-group">
-                    <input type="text" id="id_name" name="name" class="form__input">
-{#                    {{ form.name.as_widget }}#}
+{#                    <input type="text" id="id_name" name="name" class="form__input">#}
+{#                    <input type="text" id="id_name" name="name" class="form__input" maxlength="255" required="" >#}
+                    {{ form.name.as_widget }}
                     <span class="form__error">{{ form.name.errors }}</span>
                 </div>
             </div>
@@ -29,26 +34,29 @@
                 <p class="form__label">Теги</p>
                 <div class="form__field-group">
                     <div class="tags">
-
                         {% for checkbox in form.tags %}
+{#                            {{ checkbox }}#}
                             <div class="tags__item">
                                 {{ checkbox.tag }}
                                 <label for="id_{{ checkbox.id_for_label }}" class="tags__label">{{ checkbox.choice_label }}</label>
                             </div>
                         {% endfor %}
 
-                        <div class="tags__item">
-                            <input type="checkbox" name="breakfast" id="id_breakfast" class="tags__checkbox tags__checkbox_style_orange">
-                            <label for="id_breakfast" class="tags__label">Завтрак</label>
-                        </div>
-                        <div class="tags__item">
-                            <input type="checkbox" name="lunch" id="id_lunch" class="tags__checkbox tags__checkbox_style_green" checked>
-                            <label for="id_lunch" class="tags__label">Обед</label>
-                        </div>
-                        <div class="tags__item">
-                            <input type="checkbox" name="dinner" id="id_dinner" class="tags__checkbox tags__checkbox_style_purple" checked>
-                            <label for="id_dinner" class="tags__label">Ужин</label>
-                        </div>
+{#                        <div class="tags__item">#}
+{#                            <input type="checkbox" name="breakfast" id="id_breakfast" class="tags__checkbox tags__checkbox_style_orange">value="breakfast" #}
+{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_orange" id="id_tags_0">#}
+{#                            <label for="id_breakfast" class="tags__label">Завтрак</label>#}
+{#                        </div>#}
+{#                        <div class="tags__item">#}
+{#                            <input type="checkbox" name="lunch" id="id_lunch" class="tags__checkbox tags__checkbox_style_green" checked>value="lunch" #}
+{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_green" id="id_tags_1">#}
+{#                            <label for="id_lunch" class="tags__label">Обед</label>#}
+{#                        </div>#}
+{#                        <div class="tags__item">#}
+{#                            <input type="checkbox" name="dinner" id="id_dinner" class="tags__checkbox tags__checkbox_style_purple" checked>value="dinner" #}
+{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_purple" id="id_tags_2">#}
+{#                            <label for="id_dinner" class="tags__label">Ужин</label>#}
+{#                        </div>#}
                     </div>
                     <span class="form__error">{{ form.tags.errors }}</span>
                 </div>
@@ -116,19 +124,12 @@
 
 {% endblock %}
 
-{#{% block scripts %}#}
-{#<script src="{% static 'js/config/config.js' %}"></script>#}
-{#<script src="{% static 'js/components/Header.js' %}"></script>#}
-{#<script src="{% static 'js/utils/debouncing.js' %}"></script>#}
-{#<script src="{% static 'js/api/Api.js' %}"></script>#}
-{#<script src="{% static 'formRecipe.js' %}"></script>#}
-{#{% endblock %}#}
-
 {% block javascript %}
     {% load static %}
     <script src="{% static 'js/config/config.js' %}"></script>
     <script src="{% static 'js/components/Header.js' %}"></script>
     <script src="{% static 'js/utils/debouncing.js' %}"></script>
     <script src="{% static 'js/api/Api.js' %}"></script>
+    <script src="{% static 'js/tags_color.js' %}"></script>
     <script src="{% static 'formRecipe.js' %}"></script>
 {% endblock %}

@@ -22,6 +22,9 @@
             </ul>
         </div>
         <div class="card-list">
+            {% for recipe in recipes %}
+                {% include "recipes/recipe_item.html" with recipe=recipe %}
+            {% endfor %}
         <div class="card" data-id="120">
             <a href="#" class="link" target="_blank"><img src="{% static 'images/testCardImg.png' %}" alt="Какой-то текст" class="card__image"></a>
             <div class="card__body">
@@ -132,6 +135,8 @@
     </main>
 {% endblock %}
 
+{% block javascript %}
+    {% load static %}
   <script src="{% static 'js/components/MainCards.js' %}"></script>
 
   <script src="{% static 'js/components/Purchases.js' %}"></script>
@@ -143,4 +148,5 @@
 
   <script src="{% static 'js/api/Api.js' %}"></script>
   <script src="{% static 'indexAuth.js' %}"></script>
+{% endblock %}
 
