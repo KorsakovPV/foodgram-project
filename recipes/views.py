@@ -93,7 +93,7 @@ def profile(request, user_id):
 @require_GET
 def recipe_item(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    return render(request,)
+    return render(request, 'recipes/singlePage.html', {'recipe': recipe})
     # return HttpResponse('recipe_item {}\n'.format(recipe_id))
 
 
