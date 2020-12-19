@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'sorl.thumbnail',
 ]
 
 INTERNAL_IPS = [

@@ -3,6 +3,7 @@ from urllib.parse import unquote
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.views import View
 from django.views.decorators.http import (require_GET, require_http_methods,
                                           require_POST)
 from django.contrib.auth.decorators import login_required
@@ -36,9 +37,11 @@ def index(request):
     #     _extend_context(context, user)
     # return render(request, 'index.html', context)
     # return HttpResponse('0\n')#)#.join(output))
+    tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.all()
     return render(request, 'recipes/indexAuth.html', context={'username': request.user.username,
-                                                              'recipes': recipes})
+                                                              'recipes': recipes,
+                                                              'all_tags': Tag.objects.all()})
 
 #TODO Доделать new_recipe
 # @login_required(login_url='auth/login/')
@@ -72,3 +75,30 @@ def get_ingredients(request):
     data = list(Product.objects.filter(title__startswith=query).values('title', 'unit'))
     return JsonResponse(data, safe=False)
 
+
+def profile(request, user_id):
+    return HttpResponse('profile {}\n'.format(user_id))
+
+
+def recipe_item(request, recipe_id):
+    return HttpResponse('recipe_item {}\n'.format(recipe_id))
+
+
+def recipe_edit(request, recipe_id):
+    return HttpResponse('recipe_edit {}\n'.format(recipe_id))
+
+
+def recipe_delete(request, recipe_id):
+    return HttpResponse('recipe_delete {}\n'.format(recipe_id))
+
+
+def get_subscriptions(request):
+    return HttpResponse('get_subscriptions\n')
+
+
+class PurchaseView(View):
+    pass
+
+
+class FavoriteView(View):
+    pass
