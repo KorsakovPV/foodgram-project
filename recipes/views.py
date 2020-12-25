@@ -106,39 +106,67 @@ def recipe_item(request, recipe_id):
 @require_http_methods(['GET', 'POST'])
 def recipe_edit(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    context = {
-        'recipe_id': recipe_id,
-        'page_title': 'Редактирование рецепта',
-        'button_label': 'Сохранить',
-    }
-    # GET-запрос на страницу редактирования рецепта
-    if request.method == 'GET':
+    if request.user != recipe.author:
+        return redirect('recipe_view', recipe_id=recipe_id)
+    if request.method == 'POST':
+        form = RecipeForm(request.POST or None, files=request.FILES or None, instance=recipe)
+        if form.is_valid():
+            recipe.ingredients.remove()
+            recipe.recipe_amount.all().delete()
+            recipe.tags.all().delete()
+
+            recipe = form.save(commit=False)
+            recipe.author = request.user
+            recipe.save()
+            # form.save()
+
+            new_titles = request.POST.getlist('nameIngredient')
+            new_units = request.POST.getlist('unitsIngredient')
+            amounts = request.POST.getlist('valueIngredient')
+            products_num = len(new_titles)
+            new_ingredients = []
+            Ingredient.objects.filter(recipe__id=recipe_id).delete()
+            for i in range(products_num):
+                product = Product.objects.get(title=new_titles[i], unit=new_units[i])
+                new_ingredients.append(Ingredient(recipe=recipe,
+                                                  ingredient=product,
+                                                  amount=amounts[i]))
+            Ingredient.objects.bulk_create(new_ingredients)
+            # return redirect('index')
+
+            return redirect('recipe_view', recipe_id=recipe_id)
+    else:#get
         form = RecipeForm(instance=recipe)
-        context['form'] = form
-        context['recipe'] = recipe
-        return render(request, 'recipes/formRecipe.html', context)
-    # POST-запрос с данными из формы редактирования рецепта
-    elif request.method == 'POST':
-        form = RecipeForm(request.POST or None,
-                          files=request.FILES or None, instance=recipe)
-        if not form.is_valid():
-            context['form'] = form
-            return render(request, 'recipes/formRecipe.html', context)
-        form.save()
-        new_titles = request.POST.getlist('nameIngredient')
-        new_units = request.POST.getlist('unitsIngredient')
-        amounts = request.POST.getlist('valueIngredient')
-        products_num = len(new_titles)
-        new_ingredients = []
-        Ingredient.objects.filter(recipe__id=recipe_id).delete()
-        for i in range(products_num):
-            product = Product.objects.get(
-                title=new_titles[i], unit=new_units[i])
-            new_ingredients.append(Ingredient(recipe=recipe,
-                                              ingredient=product,
-                                              amount=amounts[i]))
-        Ingredient.objects.bulk_create(new_ingredients)
-        return redirect('index')
+        context = {
+            'recipe_id': recipe_id,
+            'page_title': 'Редактирование рецепта',
+            'button_label': 'Сохранить',
+            'form': form,
+            'recipe': recipe
+        }
+    return render(request, 'recipes/formRecipe.html', context)
+    # # POST-запрос с данными из формы редактирования рецепта
+    # elif request.method == 'POST':
+    #     form = RecipeForm(request.POST or None,
+    #                       files=request.FILES or None, instance=recipe)
+    #     if not form.is_valid():
+    #         context['form'] = form
+    #         return render(request, 'recipes/formRecipe.html', context)
+    #     form.save()
+    #     new_titles = request.POST.getlist('nameIngredient')
+    #     new_units = request.POST.getlist('unitsIngredient')
+    #     amounts = request.POST.getlist('valueIngredient')
+    #     products_num = len(new_titles)
+    #     new_ingredients = []
+    #     Ingredient.objects.filter(recipe__id=recipe_id).delete()
+    #     for i in range(products_num):
+    #         product = Product.objects.get(
+    #             title=new_titles[i], unit=new_units[i])
+    #         new_ingredients.append(Ingredient(recipe=recipe,
+    #                                           ingredient=product,
+    #                                           amount=amounts[i]))
+    #     Ingredient.objects.bulk_create(new_ingredients)
+    #     return redirect('index')
 
 
 
