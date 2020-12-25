@@ -4,13 +4,13 @@
 {% csrf_token %}
 <div class="card" data-id="{{ recipe.id }}">
     <link rel="stylesheet" href="{% static 'pages/index.css' %}">
-    <a href="{% url 'recipe' recipe_id=recipe.id %}" class="link" target="_blank">
+    <a href="{% url 'recipe_view' recipe_id=recipe.id %}" class="link" target="_blank">
         {% thumbnail recipe.image  "364x240" crop="center" upscale=True as im %}
             <img src="{{ im.url }}" alt="{{ recipe.name }}" class="card__image">
         {% endthumbnail %}
     </a>
     <div class="card__body">
-        <a class="card__title link" href="{% url 'recipe' recipe_id=recipe.id %}" target="_blank"> {{ recipe.name }}</a>
+        <a class="card__title link" href="{% url 'recipe_view' recipe_id=recipe.id %}" target="_blank"> {{ recipe.name }}</a>
         <ul class="card__items">
             {% for tag in recipe.tags.all %}
                 <li class="card__item"><span class="badge badge_style_{{ tag|add_color }}">{{ tag.name }}</span></li>

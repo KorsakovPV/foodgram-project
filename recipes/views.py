@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import (require_GET, require_http_methods)
@@ -20,8 +21,6 @@ def extend_context(context, user):
 
 
 @require_GET
-# TODO убрать доделать index
-# @login_required(login_url='login')
 def index(request):
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
@@ -40,7 +39,7 @@ def index(request):
     return render(request, 'recipes/indexAuth.html', context)
 
 
-# TODO Доделать new_recipe
+
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
 def new_recipe(request):
@@ -96,7 +95,6 @@ def profile(request, user_id):
     return render(request, 'recipes/indexAuth.html', context)
 
 
-#TODO последнее что осталось
 @require_GET
 def recipe_item(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -104,8 +102,44 @@ def recipe_item(request, recipe_id):
 
 
 #TODO recipe_edit
+@login_required(login_url='auth/login/')
+@require_http_methods(['GET', 'POST'])
 def recipe_edit(request, recipe_id):
-    return HttpResponse('recipe_edit {}\n'.format(recipe_id))
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    context = {
+        'recipe_id': recipe_id,
+        'page_title': 'Редактирование рецепта',
+        'button_label': 'Сохранить',
+    }
+    # GET-запрос на страницу редактирования рецепта
+    if request.method == 'GET':
+        form = RecipeForm(instance=recipe)
+        context['form'] = form
+        context['recipe'] = recipe
+        return render(request, 'recipes/formRecipe.html', context)
+    # POST-запрос с данными из формы редактирования рецепта
+    elif request.method == 'POST':
+        form = RecipeForm(request.POST or None,
+                          files=request.FILES or None, instance=recipe)
+        if not form.is_valid():
+            context['form'] = form
+            return render(request, 'recipes/formRecipe.html', context)
+        form.save()
+        new_titles = request.POST.getlist('nameIngredient')
+        new_units = request.POST.getlist('unitsIngredient')
+        amounts = request.POST.getlist('valueIngredient')
+        products_num = len(new_titles)
+        new_ingredients = []
+        Ingredient.objects.filter(recipe__id=recipe_id).delete()
+        for i in range(products_num):
+            product = Product.objects.get(
+                title=new_titles[i], unit=new_units[i])
+            new_ingredients.append(Ingredient(recipe=recipe,
+                                              ingredient=product,
+                                              amount=amounts[i]))
+        Ingredient.objects.bulk_create(new_ingredients)
+        return redirect('index')
+
 
 
 #TODO recipe_delete
@@ -169,9 +203,10 @@ def favorite_delete(request, recipe_id):
 @require_http_methods(['GET', 'POST'])
 def purchase(request):
     if request.method == 'GET':
-        recipes_list = Purchase.purchase.get_purchases_list(request.user)
+        recipes = Purchase.purchase.get_purchases_list(request.user)
         context = {
-            'recipes_list': recipes_list,
+            # 'title': 'Список покупок',
+            'recipes': recipes,
             'active': 'purchase'
         }
         return render(request, 'recipes/shopList.html', context)
@@ -206,3 +241,18 @@ def purchase_delete(request, recipe_id):
         data['success'] = 'false'
     purchase.recipes.remove(recipe)
     return JsonResponse(data)
+
+
+@login_required(login_url='auth/login/')
+@require_GET
+def send_shop_list(request):
+    user = request.user
+    ingredients = Ingredient.objects.select_related('ingredient').filter(recipe__purchase__user=user).values('ingredient__title', 'ingredient__unit').annotate(total=Sum('amount'))
+    filename = '{}_list.txt'.format(user.username)
+    products = []
+    for ingredient in ingredients:
+        products.append('{} ({}) - {}'.format(ingredient["ingredient__title"], ingredient["ingredient__unit"], ingredient["total"]))
+    content = 'Продукт (единицы) - количество \n \n' + '\n'.join(products)
+    response = HttpResponse(content, content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    return response

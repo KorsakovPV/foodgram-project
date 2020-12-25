@@ -41,22 +41,6 @@
                                 <label for="id_{{ checkbox.id_for_label }}" class="tags__label">{{ checkbox.choice_label }}</label>
                             </div>
                         {% endfor %}
-
-{#                        <div class="tags__item">#}
-{#                            <input type="checkbox" name="breakfast" id="id_breakfast" class="tags__checkbox tags__checkbox_style_orange">value="breakfast" #}
-{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_orange" id="id_tags_0">#}
-{#                            <label for="id_breakfast" class="tags__label">Завтрак</label>#}
-{#                        </div>#}
-{#                        <div class="tags__item">#}
-{#                            <input type="checkbox" name="lunch" id="id_lunch" class="tags__checkbox tags__checkbox_style_green" checked>value="lunch" #}
-{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_green" id="id_tags_1">#}
-{#                            <label for="id_lunch" class="tags__label">Обед</label>#}
-{#                        </div>#}
-{#                        <div class="tags__item">#}
-{#                            <input type="checkbox" name="dinner" id="id_dinner" class="tags__checkbox tags__checkbox_style_purple" checked>value="dinner" #}
-{#                            <input type="checkbox" name="tags" class="tags__checkbox tags__checkbox_style_purple" id="id_tags_2">#}
-{#                            <label for="id_dinner" class="tags__label">Ужин</label>#}
-{#                        </div>#}
                     </div>
                     <span class="form__error">{{ form.tags.errors }}</span>
                 </div>
@@ -72,7 +56,21 @@
                         </div>
                         <input type="number" id="cantidad" class="form__input" min="0">
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
+                    <div class="form__field-group-ingredientes-container">
+
                     </div>
+                        </div>
+
+                                                {% for ingredient in recipe.ingredients.all %}
+                      <div class="form__field-item-ingredient" id="ing{{ forloop.counter }}">
+                            <span> {{ ingredient }}</span>
+                            <span class="form__field-item-delete"></span>
+                            <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ amount.ingredient.title }}" onclick="ingredient.delete">
+                            <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ amount.quantity }}">
+                            <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ amount.ingredient.dimension }}">
+                        </div>
+                        {% endfor %}
+
                     <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
 
                     <span class="form__error">{{ form.ingredients.errors }}</span>
@@ -83,7 +81,7 @@
                 <label for="id_time" class="form__label">Время приготовления</label>
 {#                <label for="id_time" class="form__label">{{ form.cook_time.label }}</label>#}
                 <div class="form__field-group form__field-group_time">
-                    <input type="number" id="id_time" name="cook_time" class="form__input" required="">
+                    <input type="number" id="id_time" name="cook_time" class="form__input" value="{{ form.cook_time.initial }}" min="0" required="" >
 {#                    <input type="number" name="cook_time" class="form__input" id="id_time" required="">#}
 {#                    {{ form.cook_time.as_widget }}#}
                     <label for="id_time" class="form__label" >минут</label>
@@ -95,7 +93,7 @@
             <div class="form__group">
                 <label for="id_description" class="form__label">Описание</label>
                 <div class="form__field-group">
-                    <textarea name="description" id="id_description" rows="8" class="form__textarea"></textarea>
+                    <textarea name="description" id="id_description" rows="8" class="form__textarea">{{ form.description.initial }}</textarea>
 {#                    {{ form.description.as_widget }}#}
                     <span class="form__error">{{ form.description.errors }}</span>
                 </div>
@@ -105,7 +103,8 @@
                 <span class="form__label">Загрузить фото</span>
                 <div class="form__field-group">
 {#                    <input type="file" name="file" id="id_file">#}
-                    <input type="file" name="image" accept="image/*" required="" id="id_image">
+{#                    <input type="file" name="image" accept="image/*" required="" id="id_image" value="{{ form.image.initial }}">#}
+                    {{ form.image.as_widget }}
                     <span class="form__error">{{ form.image.errors }}</span>
                 </div>
             </div>
@@ -114,7 +113,7 @@
             </div>
 {#            <div class="form__footer">#}
 {#                <button type="submit" class="button button_style_blue" style="margin-right: 25px;">{{ button_label }}</button>#}
-{#                {% if form.name.value %}<a href="{% url 'delete_recipe' recipe_id=recipe_id %}" style="color: black">Удалить</a>{% endif %}#}
+{#                {% if form.name.value %}<a href="{% url 'recipe_delete' recipe_id=recipe_id %}" style="color: black">Удалить</a>{% endif %}#}
 {#            </div>#}
 
         </form>
