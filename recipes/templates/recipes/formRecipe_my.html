@@ -13,22 +13,11 @@
     <div class="form-container">
         <form class="form" method="post" enctype="multipart/form-data" action="">
             {% csrf_token %}
-{#            {% for field in form %}#}
-{#                <div class="form__group">#}
-{#                <label for="{{ field.id_for_label }}" class="form__label">{{ field.label }}</label>#}
-{#                    <div class="form__field-group">#}
-{#                    { field.label } { field }#}
-{#                        {{ field.as_widget }}#}
-{#                    </div>#}
-{#                </div>#}
-{#            {% endfor %}#}
 {#Название рецепта#}
             <div class="form__group">
                 <label for="id_name" class="form__label" required="" >Название рецепта</label>
-{#                {{ form.name.label }}#}
                 <div class="form__field-group">
                     <input type="text" id="id_name" name="name" class="form__input">
-{#                    {{ form.name.as_widget }}#}
                     <span class="form__error">{{ form.name.errors }}</span>
                 </div>
             </div>
@@ -61,29 +50,7 @@
                     <span class="form__error">{{ form.tags.errors }}</span>
                 </div>
             </div>
-
 {#        Ингредиенты#}
-{#            <div class="form__group">#}
-{#                <label for="nameIngredient" class="form__label">Ингредиенты</label>#}
-{#                <div class="form__field-group">#}
-{#                    <div class="form__field-group-ingredientes">#}
-{#                        <div class="form__dropdown">#}
-{#                            <input name="ingredients" type="text" id="nameIngredient" class="form__input">#}
-{#                            <input type="text" id="nameIngredient" class="form__input">#}
-{#                            <select name="ingredients" required="" id="id_ingredients" multiple="">#}
-{#                            <div class="form__dropdown-items"></div>#}
-{#                        </div>#}
-{#                        <input type="number" id="cantidad" class="form__input" min="0">#}
-{#                        <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>#}
-{#                    </div>#}
-{#                    <div class="form__field-group-ingredientes-container">#}
-{##}
-{#                    </div>#}
-{#                    <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>#}
-{##}
-{#                    <span class="form__error">{{ form.ingredients.errors }}</span>#}
-{#                </div>#}
-{#            </div>#}
         <div class="form__group">+
                 <label for="nameIngredient" class="form__label">Ингредиенты</label>
                 <div class="form__field-group">
@@ -96,20 +63,15 @@
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                     </div>
                     <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
-
                     <span class="form__error">{{ form.ingredients.errors }}</span>
                 </div>
             </div>
 {#        Время приготовления#}
             <div class="form__group">
                 <label for="id_time" class="form__label">Время приготовления</label>
-{#                <label for="id_time" class="form__label">{{ form.cook_time.label }}</label>#}
                 <div class="form__field-group form__field-group_time">
                     <input type="number" id="id_time" name="cook_time" class="form__input" required="">
-{#                    <input type="number" name="cook_time" class="form__input" id="id_time" required="">#}
-{#                    {{ form.cook_time.as_widget }}#}
                     <label for="id_time" class="form__label" >минут</label>
-{#                    <label for="{{ form.cook_time.id_for_label }}" class="form__label">минут</label>{{ form.cook_time.id_for_label }}#}
                     <span class="form__error">{{ form.cook_time.errors }}</span>
                 </div>
             </div>
@@ -118,7 +80,6 @@
                 <label for="id_description" class="form__label">Описание</label>
                 <div class="form__field-group">
                     <textarea name="description" id="id_description" rows="8" class="form__textarea"></textarea>
-{#                    {{ form.description.as_widget }}#}
                     <span class="form__error">{{ form.description.errors }}</span>
                 </div>
             </div>
@@ -126,7 +87,6 @@
             <div class="form__group">
                 <span class="form__label">Загрузить фото</span>
                 <div class="form__field-group">
-{#                    <input type="file" name="file" id="id_file">#}
                     <input type="file" name="image" accept="image/*" required="" id="id_image">
                     <span class="form__error">{{ form.image.errors }}</span>
                 </div>
@@ -134,11 +94,6 @@
             <div class="form__footer">
                 <button type="submit" class="button button_style_blue">Создать рецепт</button>
             </div>
-{#            <div class="form__footer">#}
-{#                <button type="submit" class="button button_style_blue" style="margin-right: 25px;">{{ button_label }}</button>#}
-{#                {% if form.name.value %}<a href="{% url 'recipe_delete' recipe_id=recipe_id %}" style="color: black">Удалить</a>{% endif %}#}
-{#            </div>#}
-
         </form>
     </div>
 
@@ -146,14 +101,6 @@
 </main>
 
 {% endblock %}
-
-{#{% block scripts %}#}
-{#<script src="{% static 'js/config/config.js' %}"></script>#}
-{#<script src="{% static 'js/components/Header.js' %}"></script>#}
-{#<script src="{% static 'js/utils/debouncing.js' %}"></script>#}
-{#<script src="{% static 'js/api/Api.js' %}"></script>#}
-{#<script src="{% static 'formRecipe.js' %}"></script>#}
-{#{% endblock %}#}
 
 {% block javascript %}
     {% load static %}

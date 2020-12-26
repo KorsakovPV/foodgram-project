@@ -3,12 +3,18 @@
 {% block title %}{{ title }}{% endblock %}
 {% load user_filters %}
 {% load static %}
+
+{% block styles %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pages/shopList.css' %}">
+{% endblock %}
+
 {% block content %}
 
 
 
 </head>
-        <link rel="stylesheet" href="{% static 'pages/shopList.css' %}">
+
 <main class="main container">
 {% csrf_token %}
     <div class="main__header">
@@ -26,7 +32,6 @@
                     <h3 class="recipe__title">{{ recipe.name }}</h3>
                     <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                 </div>
-{#                <a href="{% url 'delete_purchase' recipe.id %}" class="shopping-list__button link">Удалить</a>#}
                 <button class="shopping-list__button link">Удалить</button>
             </li>
 

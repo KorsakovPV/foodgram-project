@@ -7,13 +7,14 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import (require_GET, require_http_methods)
+from django.views.decorators.http import (require_GET, require_http_methods,
+                                          require_POST)
 
 from recipes.forms import RecipeForm
 from recipes.models import Recipe, Tag, Purchase, Favorite, Product, Ingredient
-from users.models import User
+from users.models import User, Subscription
 
-
+#TODO возможно удалить
 def extend_context(context, user):
     context['purchase_list'] = Purchase.purchase.get_purchases_list(user)
     context['favorites'] = Favorite.favorite.get_favorites(user)
@@ -98,7 +99,13 @@ def profile(request, user_id):
 @require_GET
 def recipe_item(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    return render(request, 'recipes/singlePage.html', {'recipe': recipe})
+    context = {
+        'recipe': recipe,
+        'purchase_list': Purchase.purchase.get_purchases_list(request.user),
+        'favorites': Favorite.favorite.get_favorites(request.user)
+    }
+
+    return render(request, 'recipes/singlePage.html', context)
 
 
 #TODO recipe_edit
@@ -113,26 +120,25 @@ def recipe_edit(request, recipe_id):
         if form.is_valid():
             recipe.ingredients.remove()
             recipe.recipe_amount.all().delete()
-            recipe.tags.all().delete()
 
             recipe = form.save(commit=False)
             recipe.author = request.user
-            recipe.save()
-            # form.save()
-
-            new_titles = request.POST.getlist('nameIngredient')
-            new_units = request.POST.getlist('unitsIngredient')
+            # recipe.save()
+            form.save()
+            #TODO не сохраняет старые ингредиенты
+            ingedient_names = request.POST.getlist('nameIngredient')
+            ingredient_units = request.POST.getlist('unitsIngredient')
             amounts = request.POST.getlist('valueIngredient')
-            products_num = len(new_titles)
-            new_ingredients = []
-            Ingredient.objects.filter(recipe__id=recipe_id).delete()
-            for i in range(products_num):
-                product = Product.objects.get(title=new_titles[i], unit=new_units[i])
-                new_ingredients.append(Ingredient(recipe=recipe,
-                                                  ingredient=product,
-                                                  amount=amounts[i]))
-            Ingredient.objects.bulk_create(new_ingredients)
-            # return redirect('index')
+            products = []
+            for i in range(len(ingedient_names)):
+                products.append(Product.objects.get(title=ingedient_names[i],
+                                                    unit=ingredient_units[i]))
+            ingredients = []
+            for i in range(len(amounts)):
+                ingredients.append(
+                    Ingredient(recipe=recipe, ingredient=products[i],
+                               amount=amounts[i]))
+            Ingredient.objects.bulk_create(ingredients)
 
             return redirect('recipe_view', recipe_id=recipe_id)
     else:#get
@@ -145,40 +151,45 @@ def recipe_edit(request, recipe_id):
             'recipe': recipe
         }
     return render(request, 'recipes/formRecipe.html', context)
-    # # POST-запрос с данными из формы редактирования рецепта
-    # elif request.method == 'POST':
-    #     form = RecipeForm(request.POST or None,
-    #                       files=request.FILES or None, instance=recipe)
-    #     if not form.is_valid():
-    #         context['form'] = form
-    #         return render(request, 'recipes/formRecipe.html', context)
-    #     form.save()
-    #     new_titles = request.POST.getlist('nameIngredient')
-    #     new_units = request.POST.getlist('unitsIngredient')
-    #     amounts = request.POST.getlist('valueIngredient')
-    #     products_num = len(new_titles)
-    #     new_ingredients = []
-    #     Ingredient.objects.filter(recipe__id=recipe_id).delete()
-    #     for i in range(products_num):
-    #         product = Product.objects.get(
-    #             title=new_titles[i], unit=new_units[i])
-    #         new_ingredients.append(Ingredient(recipe=recipe,
-    #                                           ingredient=product,
-    #                                           amount=amounts[i]))
-    #     Ingredient.objects.bulk_create(new_ingredients)
-    #     return redirect('index')
 
 
-
-#TODO recipe_delete
+@login_required(login_url='auth/login/')
+@require_GET
 def recipe_delete(request, recipe_id):
-    return HttpResponse('recipe_delete {}\n'.format(recipe_id))
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    recipe.delete()
+    return redirect('index')
 
 
 #TODO get_subscriptions
-def get_subscriptions(request):
-    return HttpResponse('get_subscriptions\n')
+@login_required(login_url='auth/login/')
+@require_GET
+def followers(request):
+    try:
+        subscriptions = Subscription.objects.filter(user=request.user).order_by('pk')
+    except ObjectDoesNotExist:
+        subscriptions = []
+    page_num = request.GET.get('page')
+    paginator = Paginator(subscriptions, 6)
+    page = paginator.get_page(page_num)
+    context = {
+        'active': 'subscription',
+        'paginator': paginator,
+        'page': page,
+    }
+    return render(request, 'recipes/myFollow.html', context)
 
+@login_required(login_url='auth/login/')
+@require_http_methods('DELETE')
+def delete_subscription(request, author_id):
+    author = get_object_or_404(User, id=author_id)
+    data = {'success': 'true'}
+    follow = Subscription.objects.filter(
+        user=request.user, author=author)
+    if not follow:
+        data['success'] = 'false'
+    follow.delete()
+    return JsonResponse(data)
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
@@ -238,7 +249,6 @@ def purchase(request):
             'active': 'purchase'
         }
         return render(request, 'recipes/shopList.html', context)
-        # return HttpResponse('purchase\n')
     elif request.method == 'POST':
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
@@ -284,3 +294,20 @@ def send_shop_list(request):
     response = HttpResponse(content, content_type='text/plain')
     response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
+
+
+@login_required(login_url='auth/login/')
+@require_POST
+def subscriptions(request):
+    json_data = json.loads(request.body.decode())
+    author = get_object_or_404(User, id=json_data['id'])
+    is_exist = Subscription.objects.filter(
+        user=request.user, author=author).exists()
+    data = {'success': 'true'}
+    if is_exist:
+        data['success'] = 'false'
+    else:
+        Subscription.objects.create(user=request.user, author=author)
+    return JsonResponse(data)
+
+

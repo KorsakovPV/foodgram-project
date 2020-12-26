@@ -10,6 +10,17 @@ const addIng = document.querySelector('#addIng');
 const api = new Api(apiUrl);
 const header = new Header(counterId);
 
+const defineInitialIndex = function () {
+    const ingredients = ingredientsContainer.querySelectorAll('.form__field-item-ingredient')
+    if (ingredients.length === 0) { return 1 }
+    const data = Array.from(ingredients).map(item => {
+        if (!item.getAttribute('id')) { return 0 }
+        if (!item.getAttribute('id').split('_')[1]) { return 0 }
+        return Number(item.getAttribute('id').split('_')[1])
+    })
+    data.sort((a, b) => a-b)
+    return data[data.length - 1] + 1
+}
 
 function Ingredients() {
     let cur = 1;

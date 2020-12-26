@@ -22,20 +22,6 @@
             {% if form.non_field_errors %}
                 <li>{{ form.non_field_errors }}</li>
             {% endif %}
-
-{#            <table>#}
-{##}
-{#                <tr>#}
-{#                  <td>{{ form.username.label_tag }}</td>#}
-{#                  <td>{{ form.username }}</td>#}
-{#                </tr>#}
-{##}
-{#                <tr>#}
-{#                  <td>{{ form.password.label_tag }}</td>#}
-{#                  <td>{{ form.password }}</td>#}
-{#                </tr>#}
-{#            </table>#}
-
             <div class="form__group">
                 <label for="id_first_name" class="form__label">Имя</label>
                 <div class="form__field-group">
@@ -70,9 +56,6 @@
             <div class="form__group">
                 <label for="id_password" class="form__label">Пароль</label>
                 <div class="form__field-group">
-
-{#                    <input type="text" name="password" maxlength="128" required="" id="id_password">#}
-
                     <input type="password" name="password" id="id_password" class="form__input" maxlength="128" required="">
                     {{ form.password.error }}
                     {% if form.password.errors %}

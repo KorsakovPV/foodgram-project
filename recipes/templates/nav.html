@@ -7,7 +7,7 @@
                     <li class="nav__item"><a href="{% url 'followers' %}" class="nav__link link">Мои подписки</a></li>
                     <li class="nav__item"><a href="{% url 'recipe_new' %}" class="nav__link link">Создать рецепт</a></li>
                     <li class="nav__item"><a href="{% url 'favorite' %}" class="nav__link link">Избранное</a></li>
-                    <li class="nav__item"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a> <span class="badge badge_style_blue nav__badge" id="counter">4{ counter }</span></li>
+                    <li class="nav__item"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a> <span class="badge badge_style_blue nav__badge" id="counter">{{ counter }}</span></li>
                 </ul>
                 <ul class="nav__items list">
                     <li class="nav__item"><a class="nav__link link">{{ user }}</a></li>
