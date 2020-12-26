@@ -1,6 +1,8 @@
-from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+
 from users.models import User
+
 
 class Product(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название продукта')
@@ -21,15 +23,12 @@ class Tag(models.Model):
 class RecipeManager(models.Manager):
     def tag_filter(self, tags):
         if tags:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).filter(
-                tags__slug__in=tags
-            ).distinct()
+            return super().get_queryset().prefetch_related('author',
+                                                           'tags').filter(
+                tags__slug__in=tags).distinct()
         else:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).all()
+            return super().get_queryset().prefetch_related('author',
+                                                           'tags').all()
 
 
 class Recipe(models.Model):
@@ -43,7 +42,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, verbose_name='Теги', blank=True)
     ingredients = models.ManyToManyField(
         Product, through='Ingredient', related_name='recipe_ingredients')
-    cook_time = models.IntegerField(verbose_name='Время приготовления')
+    cook_time = models.PositiveIntegerField(verbose_name='Время приготовления')
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Время публикации', db_index=True)
 
@@ -57,9 +56,10 @@ class Recipe(models.Model):
 
 
 class Ingredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='recipe_amount')
     ingredient = models.ForeignKey(Product, on_delete=models.CASCADE)
-    amount = models.FloatField(verbose_name='Количество ингредиента')
+    amount = models.PositiveIntegerField(verbose_name='Количество ингредиента')
 
     class Meta:
         unique_together = ('ingredient', 'amount', 'recipe')

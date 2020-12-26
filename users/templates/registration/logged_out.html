@@ -1,5 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'recipes/base.html' %}
 {% block title %}Вы вышли{% endblock %}
+
+{% block styles %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pages/form.css' %}">
+{% endblock %}
 
 {% block content %}
 <main class="main container">

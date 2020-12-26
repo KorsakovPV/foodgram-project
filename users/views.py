@@ -5,8 +5,7 @@ from .forms import CreationForm
 
 
 class SignUp(CreateView):
-    #TODO Валидация пароля, желательно после регистрации быть залогиненым.
+#TODO Валидация пароля, желательно после регистрации быть залогиненым.
     form_class = CreationForm
-    success_url = reverse_lazy('login')#('login')('index')
-    # success_url = '/auth/login/'
+    success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
