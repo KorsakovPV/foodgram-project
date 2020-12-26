@@ -1,5 +1,7 @@
 from django.contrib import admin
-from recipes.models import Recipe, Product, Tag, Ingredient, Favorite, Purchase
+
+from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe, Tag
+
 
 class IngredientInline(admin.TabularInline):
     model = Ingredient
@@ -40,6 +42,7 @@ class PurchaseAdmin(admin.ModelAdmin):
     def show_recipes(self, obj):
         recipes = obj.recipes.all()
         return '\n'.join([recipe.name for recipe in recipes])
+
 
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Product, ProductAdmin)

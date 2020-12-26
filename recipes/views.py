@@ -6,19 +6,25 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import (require_GET, require_http_methods,
-                                          require_POST)
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import (
+    require_GET,
+    require_http_methods,
+    require_POST
+)
 
 from recipes.forms import RecipeForm
-from recipes.models import Recipe, Tag, Purchase, Favorite, Product, Ingredient
-from users.models import User, Subscription
+from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe, Tag
+from users.models import Subscription, User
 
 
 def extend_context(context, user):
     context['purchase_list'] = Purchase.purchase.get_purchases_list(user)
     context['favorites'] = Favorite.favorite.get_favorites(user)
-    context['ingredient_count'] = Ingredient.objects.select_related('ingredient').filter(recipe__purchase__user=user).values('ingredient__title', 'ingredient__unit').annotate(total=Sum('amount')).count()
+    context['ingredient_count'] = Ingredient.objects.select_related(
+        'ingredient').filter(recipe__purchase__user=user).values(
+        'ingredient__title', 'ingredient__unit').annotate(
+        total=Sum('amount')).count()
     return context
 
 
@@ -39,7 +45,6 @@ def index(request):
     if user.is_authenticated:
         context = extend_context(context, user)
     return render(request, 'recipes/indexAuth.html', context)
-
 
 
 @login_required(login_url='auth/login/')
@@ -68,7 +73,9 @@ def new_recipe(request):
         return redirect('index')
     context = {'username': request.user.username,
                'page_title': 'Создание рецепта',
-               'button': 'Создать рецепт'
+               'button': 'Создать рецепт',
+               'all_tags': Tag.objects.all(),
+               'form': form,
                }
     user = request.user
     if user.is_authenticated:
@@ -80,7 +87,8 @@ def new_recipe(request):
 @require_http_methods(["GET"])
 def get_ingredients(request):
     query = unquote(request.GET.get('query'))
-    data = list(Product.objects.filter(title__startswith=query).values('title', 'unit'))
+    data = list(Product.objects.filter(title__startswith=query).values('title',
+                                                                       'unit'))
     return JsonResponse(data, safe=False)
 
 
@@ -115,7 +123,7 @@ def recipe_item(request, recipe_id):
     return render(request, 'recipes/singlePage.html', context)
 
 
-#TODO recipe_edit
+# TODO recipe_edit
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
 def recipe_edit(request, recipe_id):
@@ -123,7 +131,8 @@ def recipe_edit(request, recipe_id):
     if request.user != recipe.author:
         return redirect('recipe_view', recipe_id=recipe_id)
     if request.method == 'POST':
-        form = RecipeForm(request.POST or None, files=request.FILES or None, instance=recipe)
+        form = RecipeForm(request.POST or None, files=request.FILES or None,
+                          instance=recipe)
         if form.is_valid():
             recipe.ingredients.remove()
             recipe.recipe_amount.all().delete()
@@ -131,7 +140,7 @@ def recipe_edit(request, recipe_id):
             recipe.author = request.user
             # recipe.save()
             form.save()
-            #TODO не сохраняет старые ингредиенты
+            # TODO не сохраняет ингредиенты загруженные в форму
             ingedient_names = request.POST.getlist('nameIngredient')
             ingredient_units = request.POST.getlist('unitsIngredient')
             amounts = request.POST.getlist('valueIngredient')
@@ -152,7 +161,7 @@ def recipe_edit(request, recipe_id):
         context = {
             'recipe_id': recipe_id,
             'page_title': 'Редактирование рецепта',
-            'button_label': 'Сохранить',
+            'button': 'Сохранить',
             'form': form,
             'recipe': recipe
         }
@@ -171,7 +180,8 @@ def recipe_delete(request, recipe_id):
 @require_GET
 def followers(request):
     try:
-        subscriptions = Subscription.objects.filter(user=request.user).order_by('pk')
+        subscriptions = Subscription.objects.filter(
+            user=request.user).order_by('pk')
     except ObjectDoesNotExist:
         subscriptions = []
     page_num = request.GET.get('page')
@@ -182,7 +192,11 @@ def followers(request):
         'paginator': paginator,
         'page': page,
     }
+    user = request.user
+    if user.is_authenticated:
+        context = extend_context(context, user)
     return render(request, 'recipes/myFollow.html', context)
+
 
 @login_required(login_url='auth/login/')
 @require_http_methods('DELETE')
@@ -195,6 +209,7 @@ def delete_subscription(request, author_id):
         data['success'] = 'false'
     follow.delete()
     return JsonResponse(data)
+
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
@@ -242,6 +257,7 @@ def favorite_delete(request, recipe_id):
         data['success'] = 'false'
     favorite.recipes.remove(recipe)
     return JsonResponse(data)
+
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
@@ -292,11 +308,16 @@ def purchase_delete(request, recipe_id):
 @require_GET
 def send_shop_list(request):
     user = request.user
-    ingredients = Ingredient.objects.select_related('ingredient').filter(recipe__purchase__user=user).values('ingredient__title', 'ingredient__unit').annotate(total=Sum('amount'))
+    ingredients = Ingredient.objects.select_related('ingredient').filter(
+        recipe__purchase__user=user).values('ingredient__title',
+                                            'ingredient__unit').annotate(
+        total=Sum('amount'))
     filename = '{}_list.txt'.format(user.username)
     products = []
     for ingredient in ingredients:
-        products.append('{} ({}) - {}'.format(ingredient["ingredient__title"], ingredient["ingredient__unit"], ingredient["total"]))
+        products.append('{} ({}) - {}'.format(ingredient["ingredient__title"],
+                                              ingredient["ingredient__unit"],
+                                              ingredient["total"]))
     content = 'Продукт (единицы) - количество \n \n' + '\n'.join(products)
     response = HttpResponse(content, content_type='text/plain')
     response['Content-Disposition'] = f'attachment; filename={filename}'
@@ -317,6 +338,7 @@ def subscriptions(request):
         Subscription.objects.create(user=request.user, author=author)
     return JsonResponse(data)
 
+
 def page_not_found(request, exception):
     return render(
         request,
@@ -328,5 +350,3 @@ def page_not_found(request, exception):
 
 def server_error(request):
     return render(request, 'recipes/misc/500.html', status=500)
-
-

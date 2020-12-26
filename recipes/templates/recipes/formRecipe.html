@@ -67,16 +67,17 @@
                         <input type="number" id="cantidad" class="form__input" min="0">
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                     </div>
-
+<div class="form__field-group-ingredientes-container">
                     {% for ingredient in recipe.recipe_amount.all %}
-                        <div id="ing{{ forloop.counter }}" class="form__field-item-ingredient">
-                            <span> {{ ingredient.ingredient.title }} {{ ingredient.amount }} {{ ingredient.ingredient.unit }}</span>
+                        <div id="ing_{{ forloop.counter }}" class="form__field-item-ingredient">
+                            <span> {{ ingredient.ingredient.title }} {{ ingredient.amount }}{{ ingredient.ingredient.unit }}</span>
                             <span class="form__field-item-delete"></span>
                             <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.title }}">
                             <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.amount }}">
                             <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.unit }}">
                         </div>
                     {% endfor %}
+</div>
 
 
                     <div class="form__field-group">
@@ -98,7 +99,11 @@
             <div class="form__group">
                 <label for="id_description" class="form__label">Описание</label>
                 <div class="form__field-group">
-                    <textarea name="description" id="id_description" rows="8" class="form__textarea">{{ form.description.initial }}</textarea>
+                    {% if form.description.initial == 'None' %}#}
+                        <textarea name="description" id="id_description" rows="8" class="form__textarea">if{{ form.description.initial }}</textarea>
+                    {% else %}
+                        <textarea name="description" id="id_description" rows="8" class="form__textarea"></textarea>
+                    {% endif %}
                     <span class="form__error">{{ form.description.errors }}</span>
                 </div>
             </div>

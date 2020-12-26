@@ -1,6 +1,8 @@
-from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+
 from users.models import User
+
 
 class Product(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название продукта')
@@ -21,9 +23,12 @@ class Tag(models.Model):
 class RecipeManager(models.Manager):
     def tag_filter(self, tags):
         if tags:
-            return super().get_queryset().prefetch_related('author', 'tags').filter(tags__slug__in=tags).distinct()
+            return super().get_queryset().prefetch_related('author',
+                                                           'tags').filter(
+                tags__slug__in=tags).distinct()
         else:
-            return super().get_queryset().prefetch_related('author', 'tags').all()
+            return super().get_queryset().prefetch_related('author',
+                                                           'tags').all()
 
 
 class Recipe(models.Model):
@@ -51,7 +56,8 @@ class Recipe(models.Model):
 
 
 class Ingredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_amount')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='recipe_amount')
     ingredient = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(verbose_name='Количество ингредиента')
 

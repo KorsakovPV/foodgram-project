@@ -2,7 +2,6 @@ from django.urls import path
 
 from recipes import views
 
-
 urlpatterns = [
     path('', views.index, name='index'),
     path('profile/<int:user_id>', views.profile, name='profile'),
