@@ -18,11 +18,23 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+from django.contrib.flatpages import views
+from django.conf.urls import handler404, handler500
+
+handler404 = 'recipes.views.page_not_found'  # noqa
+handler500 = 'recipes.views.server_error'  # noqa
 
 urlpatterns = [
     path('', include('recipes.urls')),
     path('accounts/', include('users.urls')),
     path('admin/', admin.site.urls),
+]
+
+urlpatterns += [
+    path("about/about-author/", views.flatpage,
+         {"url": "/about-author/"}, name="about-author"),
+    path("about/about-spec/", views.flatpage,
+         {"url": "/about-spec/"}, name="about-spec"),
 ]
 
 if settings.DEBUG:

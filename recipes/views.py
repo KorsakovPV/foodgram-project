@@ -14,10 +14,11 @@ from recipes.forms import RecipeForm
 from recipes.models import Recipe, Tag, Purchase, Favorite, Product, Ingredient
 from users.models import User, Subscription
 
-#TODO возможно удалить
+
 def extend_context(context, user):
     context['purchase_list'] = Purchase.purchase.get_purchases_list(user)
     context['favorites'] = Favorite.favorite.get_favorites(user)
+    context['ingredient_count'] = Ingredient.objects.select_related('ingredient').filter(recipe__purchase__user=user).values('ingredient__title', 'ingredient__unit').annotate(total=Sum('amount')).count()
     return context
 
 
@@ -32,7 +33,7 @@ def index(request):
                'title': 'Рецепты',
                'all_tags': Tag.objects.all(),
                'page': page,
-               'paginator': paginator
+               'paginator': paginator,
                }
     user = request.user
     if user.is_authenticated:
@@ -65,12 +66,18 @@ def new_recipe(request):
                            amount=amounts[i]))
         Ingredient.objects.bulk_create(ingredients)
         return redirect('index')
-    return render(request, 'recipes/formRecipe.html', {'form': form})
+    context = {'username': request.user.username,
+               'page_title': 'Создание рецепта',
+               'button': 'Создать рецепт'
+               }
+    user = request.user
+    if user.is_authenticated:
+        context = extend_context(context, user)
+    return render(request, 'recipes/formRecipe.html', context)
 
 
 @login_required(login_url='auth/login/')
 @require_http_methods(["GET"])
-# @require_GET
 def get_ingredients(request):
     query = unquote(request.GET.get('query'))
     data = list(Product.objects.filter(title__startswith=query).values('title', 'unit'))
@@ -120,7 +127,6 @@ def recipe_edit(request, recipe_id):
         if form.is_valid():
             recipe.ingredients.remove()
             recipe.recipe_amount.all().delete()
-
             recipe = form.save(commit=False)
             recipe.author = request.user
             # recipe.save()
@@ -141,7 +147,7 @@ def recipe_edit(request, recipe_id):
             Ingredient.objects.bulk_create(ingredients)
 
             return redirect('recipe_view', recipe_id=recipe_id)
-    else:#get
+    else:
         form = RecipeForm(instance=recipe)
         context = {
             'recipe_id': recipe_id,
@@ -161,7 +167,6 @@ def recipe_delete(request, recipe_id):
     return redirect('index')
 
 
-#TODO get_subscriptions
 @login_required(login_url='auth/login/')
 @require_GET
 def followers(request):
@@ -244,10 +249,12 @@ def purchase(request):
     if request.method == 'GET':
         recipes = Purchase.purchase.get_purchases_list(request.user)
         context = {
-            # 'title': 'Список покупок',
             'recipes': recipes,
             'active': 'purchase'
         }
+        user = request.user
+        if user.is_authenticated:
+            context = extend_context(context, user)
         return render(request, 'recipes/shopList.html', context)
     elif request.method == 'POST':
         json_data = json.loads(request.body.decode())
@@ -309,5 +316,17 @@ def subscriptions(request):
     else:
         Subscription.objects.create(user=request.user, author=author)
     return JsonResponse(data)
+
+def page_not_found(request, exception):
+    return render(
+        request,
+        'recipes/misc/404.html',
+        {'path': request.path},
+        status=404
+    )
+
+
+def server_error(request):
+    return render(request, 'recipes/misc/500.html', status=500)
 
 

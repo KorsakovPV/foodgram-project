@@ -1,7 +1,7 @@
 {% load thumbnail user_filters %}
 <div class="card-user" data-author="{{ author.author.id }}">
     <div class="card-user__header">
-        <h2 class="card-user__title">{{ author.author }}</h2>
+        <h2 class="card-user__title">{{ author.author.first_name }}</h2>
     </div>
     <div class="card-user__body">
         <ul class="card-user__items">
@@ -12,7 +12,9 @@
                             {% thumbnail recipe.image "72x72" crop="center" upscale=True as im %}
                             <img src="{{ im.url }}" alt="{{ recipe.name }}" class="recipe__image">
                             {% endthumbnail %}
-                            <h3 class="recipe__title">{{ recipe.name }}</h3>
+                            <h3 class="recipe__title">
+{#                                <a href="{% url 'recipe_view' recipe_id=recipe.id %}">#}
+                                {{ recipe.name }}</h3>
                             <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                         </div>
                     </li>
