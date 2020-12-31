@@ -32,6 +32,13 @@ def extend_context(context, user):
 def index(request):
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
+    #TODO 6 - магическая константа. Ничего не значит, не имеет имени, сложна в
+    # поддержке (для изменения нужно выкатить новую версию кода), дублируется в
+    # нескольких вьюхах.
+    # Поэтому:
+    # выносим как именованную константу модуля
+    # выносим в настройки, чтобы можно было поменять конфигурацию без изменения
+    # кода
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -43,6 +50,17 @@ def index(request):
                }
     user = request.user
     if user.is_authenticated:
+        #TODO Меня берут смутные сомнения относительно вот этой части.
+        # Если я правильно понимаю, то это нужно, чтобы корректно обрабатывать
+        # кнопки "подписаться", "купить" и "избранное". Но в итоге на каждый
+        # запрос из базы придут тяжелые ответы с кучей разной информации.
+        # Намного легче и проще посылать в базу запросы, которые будут отвечать
+        # именно на нужные нам вопросы - "куплен ли", "подписан ли", "в
+        # избранном ли". Получается один мини-запрос на рецепт/автора, который
+        # отдает только True|False. А пользоваться таким методом будет очень
+        # просто, если запихнуть его в темплейт-теги и применять к
+        # рецепту/автору/кнопке
+        # Советую попробовать и потом поправить в остальных местах тоже
         context = extend_context(context, user)
     return render(request, 'recipes/indexAuth.html', context)
 
@@ -54,9 +72,17 @@ def new_recipe(request):
     if form.is_valid():
         recipe = form.save(commit=False)
         recipe.author = request.user
+        #TODO закоментированный код точно так же убираем из финальной версии кода,
+        # только если он не относится к примеру использования или докстрингам
         # recipe.save()
         form.save()
         # TODO попробовать сделать через форму
+        #  Советую вынести в отдельную функцию-хелпер все, что связано с
+        #  получением ингридиентов из формы. Ибо это часть, которая связана с
+        #  запросом от фронта, а фронт могут переписать. При этом остальная
+        #  наша логика работы вьюхи меняться  не должна.
+        #  Таким образом мы отдадим всю сериализацию в стороннее место, а код
+        #  вьюхи меняться в зависимости от работы фронта не будет
         ingedient_names = request.POST.getlist('nameIngredient')
         ingredient_units = request.POST.getlist('unitsIngredient')
         amounts = request.POST.getlist('valueIngredient')
@@ -101,6 +127,9 @@ def profile(request, user_id):
     page = paginator.get_page(page_number)
     context = {'username': request.user.username,
                'title': author.first_name,
+               #TODO вижу такое уже второй раз - мб переиспользовать? Например,
+               #  темплейт - тег или напрямую в шаблоне запрашивать такую
+               #  информацию?
                'all_tags': Tag.objects.all(),
                'page': page,
                'paginator': paginator
@@ -116,6 +145,9 @@ def recipe_item(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     context = {
         'recipe': recipe,
+        #TODO Аналогично, здесь прям очень ярко. Мы передаем в контекст весь
+        # список покупок юзера для того, чтобы увидеть на странице одного
+        # рецепта правильную кнопку? Ну такое
         'purchase_list': Purchase.purchase.get_purchases_list(request.user),
         'favorites': Favorite.favorite.get_favorites(request.user)
     }
@@ -138,9 +170,12 @@ def recipe_edit(request, recipe_id):
             recipe.recipe_amount.all().delete()
             recipe = form.save(commit=False)
             recipe.author = request.user
-            # recipe.save()
             form.save()
             # TODO не сохраняет ингредиенты загруженные в форму
+            #TODO Аналогично, но тут уже вступает в силу принцип
+            # "недублирования кода". Очень хотелось бы увидеть
+            # переиспользование этого функционала, потому что он достаточно
+            # сложный и практически буква в букву дублируется
             ingedient_names = request.POST.getlist('nameIngredient')
             ingredient_units = request.POST.getlist('unitsIngredient')
             amounts = request.POST.getlist('valueIngredient')
@@ -213,6 +248,12 @@ def delete_subscription(request, author_id):
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
+#TODO Советую подумать над названиями, потому что название вью-функции не
+# отображает, что в ней будет происходить. Особенно если учесть, что в ней
+# может происходить абсолютно разные действия. Заодно советую глянуть остальные
+# функции, просто здесь очень ярко эта проблема видна. что "избранное"? А вот
+# "добавить в избранное" или "получить избранное" - уже понятно
+
 def favorite(request):
     if request.method == 'GET':
         tags = request.GET.getlist('tag')
@@ -230,6 +271,9 @@ def favorite(request):
         user = request.user
         context = extend_context(context, user)
         return render(request, 'recipes/indexAuth.html', context)
+    #TODO Тут абсолютно разный код для двух разных запросов. Есть ли смысл
+    # держать их в одной функции? ИМХО, они настолько не связаны между собой,
+    # что было бы лучше их разделить по разным вью-функциям
     elif request.method == 'POST':
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']

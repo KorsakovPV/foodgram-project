@@ -11,4 +11,5 @@ class Command(BaseCommand):
         tag2 = Tag.objects.get_or_create(name='обед', slug='lunch')
         tag3 = Tag.objects.get_or_create(name='ужин', slug='dinner')
         queryset = Tag.objects.all()
+        #TODO дебаг принты заменяем на дебаг-логи
         print(queryset)
