@@ -13,7 +13,6 @@
                             <img src="{{ im.url }}" alt="{{ recipe.name }}" class="recipe__image">
                             {% endthumbnail %}
                             <h3 class="recipe__title">
-{#                                <a href="{% url 'recipe_view' recipe_id=recipe.id %}">#}
                                 {{ recipe.name }}</h3>
                             <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                         </div>

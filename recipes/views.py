@@ -17,10 +17,10 @@ from recipes.forms import RecipeForm
 from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe, Tag
 from users.models import Subscription, User
 
+from foodgram.settings import RECIPES_ON_PAGE
+
 
 def extend_context(context, user):
-    context['purchase_list'] = Purchase.purchase.get_purchases_list(user)
-    context['favorites'] = Favorite.favorite.get_favorites(user)
     context['ingredient_count'] = Ingredient.objects.select_related(
         'ingredient').filter(recipe__purchase__user=user).values(
         'ingredient__title', 'ingredient__unit').annotate(
@@ -29,40 +29,38 @@ def extend_context(context, user):
 
 
 @require_GET
-def index(request):
+def index_view(request):
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
-    #TODO 6 - магическая константа. Ничего не значит, не имеет имени, сложна в
-    # поддержке (для изменения нужно выкатить новую версию кода), дублируется в
-    # нескольких вьюхах.
-    # Поэтому:
-    # выносим как именованную константу модуля
-    # выносим в настройки, чтобы можно было поменять конфигурацию без изменения
-    # кода
-    paginator = Paginator(recipes, 6)
+    paginator = Paginator(recipes, RECIPES_ON_PAGE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {'username': request.user.username,
                'title': 'Рецепты',
-               'all_tags': Tag.objects.all(),
                'page': page,
                'paginator': paginator,
+               'purchase': Purchase.purchase,
                }
     user = request.user
     if user.is_authenticated:
-        #TODO Меня берут смутные сомнения относительно вот этой части.
-        # Если я правильно понимаю, то это нужно, чтобы корректно обрабатывать
-        # кнопки "подписаться", "купить" и "избранное". Но в итоге на каждый
-        # запрос из базы придут тяжелые ответы с кучей разной информации.
-        # Намного легче и проще посылать в базу запросы, которые будут отвечать
-        # именно на нужные нам вопросы - "куплен ли", "подписан ли", "в
-        # избранном ли". Получается один мини-запрос на рецепт/автора, который
-        # отдает только True|False. А пользоваться таким методом будет очень
-        # просто, если запихнуть его в темплейт-теги и применять к
-        # рецепту/автору/кнопке
-        # Советую попробовать и потом поправить в остальных местах тоже
         context = extend_context(context, user)
     return render(request, 'recipes/indexAuth.html', context)
+
+
+def get_ingredients_from_form(request, recipe):
+    ingedient_names = request.POST.getlist('nameIngredient')
+    ingredient_units = request.POST.getlist('unitsIngredient')
+    amounts = request.POST.getlist('valueIngredient')
+    products = []
+    for i in range(len(ingedient_names)):
+        products.append(Product.objects.get(title=ingedient_names[i],
+                                            unit=ingredient_units[i]))
+    ingredients = []
+    for i in range(len(amounts)):
+        ingredients.append(
+            Ingredient(recipe=recipe, ingredient=products[i],
+                       amount=amounts[i]))
+    return ingredients
 
 
 @login_required(login_url='auth/login/')
@@ -72,35 +70,13 @@ def new_recipe(request):
     if form.is_valid():
         recipe = form.save(commit=False)
         recipe.author = request.user
-        #TODO закоментированный код точно так же убираем из финальной версии кода,
-        # только если он не относится к примеру использования или докстрингам
-        # recipe.save()
         form.save()
-        # TODO попробовать сделать через форму
-        #  Советую вынести в отдельную функцию-хелпер все, что связано с
-        #  получением ингридиентов из формы. Ибо это часть, которая связана с
-        #  запросом от фронта, а фронт могут переписать. При этом остальная
-        #  наша логика работы вьюхи меняться  не должна.
-        #  Таким образом мы отдадим всю сериализацию в стороннее место, а код
-        #  вьюхи меняться в зависимости от работы фронта не будет
-        ingedient_names = request.POST.getlist('nameIngredient')
-        ingredient_units = request.POST.getlist('unitsIngredient')
-        amounts = request.POST.getlist('valueIngredient')
-        products = []
-        for i in range(len(ingedient_names)):
-            products.append(Product.objects.get(title=ingedient_names[i],
-                                                unit=ingredient_units[i]))
-        ingredients = []
-        for i in range(len(amounts)):
-            ingredients.append(
-                Ingredient(recipe=recipe, ingredient=products[i],
-                           amount=amounts[i]))
+        ingredients = get_ingredients_from_form(request, recipe)
         Ingredient.objects.bulk_create(ingredients)
         return redirect('index')
     context = {'username': request.user.username,
                'page_title': 'Создание рецепта',
                'button': 'Создать рецепт',
-               'all_tags': Tag.objects.all(),
                'form': form,
                }
     user = request.user
@@ -118,19 +94,15 @@ def get_ingredients(request):
     return JsonResponse(data, safe=False)
 
 
-def profile(request, user_id):
+def profile_view(request, user_id):
     author = get_object_or_404(User, id=user_id)
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
-    paginator = Paginator(recipes.filter(author=author), 6)
+    paginator = Paginator(recipes.filter(author=author), RECIPES_ON_PAGE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {'username': request.user.username,
                'title': author.first_name,
-               #TODO вижу такое уже второй раз - мб переиспользовать? Например,
-               #  темплейт - тег или напрямую в шаблоне запрашивать такую
-               #  информацию?
-               'all_tags': Tag.objects.all(),
                'page': page,
                'paginator': paginator
                }
@@ -145,17 +117,11 @@ def recipe_item(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     context = {
         'recipe': recipe,
-        #TODO Аналогично, здесь прям очень ярко. Мы передаем в контекст весь
-        # список покупок юзера для того, чтобы увидеть на странице одного
-        # рецепта правильную кнопку? Ну такое
-        'purchase_list': Purchase.purchase.get_purchases_list(request.user),
-        'favorites': Favorite.favorite.get_favorites(request.user)
     }
 
     return render(request, 'recipes/singlePage.html', context)
 
 
-# TODO recipe_edit
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
 def recipe_edit(request, recipe_id):
@@ -171,34 +137,17 @@ def recipe_edit(request, recipe_id):
             recipe = form.save(commit=False)
             recipe.author = request.user
             form.save()
-            # TODO не сохраняет ингредиенты загруженные в форму
-            #TODO Аналогично, но тут уже вступает в силу принцип
-            # "недублирования кода". Очень хотелось бы увидеть
-            # переиспользование этого функционала, потому что он достаточно
-            # сложный и практически буква в букву дублируется
-            ingedient_names = request.POST.getlist('nameIngredient')
-            ingredient_units = request.POST.getlist('unitsIngredient')
-            amounts = request.POST.getlist('valueIngredient')
-            products = []
-            for i in range(len(ingedient_names)):
-                products.append(Product.objects.get(title=ingedient_names[i],
-                                                    unit=ingredient_units[i]))
-            ingredients = []
-            for i in range(len(amounts)):
-                ingredients.append(
-                    Ingredient(recipe=recipe, ingredient=products[i],
-                               amount=amounts[i]))
+            ingredients = get_ingredients_from_form(request, recipe)
             Ingredient.objects.bulk_create(ingredients)
-
             return redirect('recipe_view', recipe_id=recipe_id)
-    else:
-        form = RecipeForm(instance=recipe)
-        context = {
-            'recipe_id': recipe_id,
-            'page_title': 'Редактирование рецепта',
-            'button': 'Сохранить',
-            'form': form,
-            'recipe': recipe
+
+    form = RecipeForm(instance=recipe)
+    context = {
+        'recipe_id': recipe_id,
+        'page_title': 'Редактирование рецепта',
+        'button': 'Сохранить',
+        'form': form,
+        'recipe': recipe
         }
     return render(request, 'recipes/formRecipe.html', context)
 
@@ -220,7 +169,7 @@ def followers(request):
     except ObjectDoesNotExist:
         subscriptions = []
     page_num = request.GET.get('page')
-    paginator = Paginator(subscriptions, 6)
+    paginator = Paginator(subscriptions, RECIPES_ON_PAGE)
     page = paginator.get_page(page_num)
     context = {
         'active': 'subscription',
@@ -254,17 +203,16 @@ def delete_subscription(request, author_id):
 # функции, просто здесь очень ярко эта проблема видна. что "избранное"? А вот
 # "добавить в избранное" или "получить избранное" - уже понятно
 
-def favorite(request):
+def favorite_view(request):
     if request.method == 'GET':
         tags = request.GET.getlist('tag')
         user = request.user
         recipes = Favorite.favorite.get_tag_filtered(user, tags)
-        paginator = Paginator(recipes, 6)
+        paginator = Paginator(recipes, RECIPES_ON_PAGE)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
         context = {'username': request.user.username,
                    'title': 'Избранное',
-                   'all_tags': Tag.objects.all(),
                    'page': page,
                    'paginator': paginator
                    }

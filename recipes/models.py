@@ -15,6 +15,7 @@ class Product(models.Model):
 class Tag(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название тега')
     slug = models.SlugField(verbose_name='Слаг тега')
+    colors = models.SlugField(verbose_name='Цвет тега', default='Black')
 
     def __str__(self):
         return '{name}'.format(name=self.name)

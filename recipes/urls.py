@@ -3,9 +3,9 @@ from django.urls import path
 from recipes import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('profile/<int:user_id>', views.profile, name='profile'),
-    path('favorites/', views.favorite, name='favorite'),
+    path('', views.index_view, name='index'),
+    path('profile/<int:user_id>', views.profile_view, name='profile'),
+    path('favorites', views.favorite_view, name='favorite'),
     path('favorites/<int:recipe_id>', views.favorite_delete, name='delete_favorite'),
     path('subscriptions', views.subscriptions, name='subscriptions'),
     path('subscriptions/<int:author_id>', views.delete_subscription, name='followers_delete'),

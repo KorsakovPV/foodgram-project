@@ -1,5 +1,8 @@
 from django import template
 
+from recipes.models import Tag, Purchase, Favorite
+from users.models import Subscription
+
 register = template.Library()
 
 
@@ -10,18 +13,10 @@ def url_with_get(request, page):
     return query.urlencode()
 
 
-#TODO теги уже хранятся в базе как абстрактные строчки, а тут - прибитый
-# гвоздями к коду список тегов и их соответствие цветам (читай - словарь
-# строка:строка). Намного лучше и дальше поддерживать хороший подход, не
-# фиксируя какие-то определенные детали. Например, можно вынести цвет тоже в
-# базу
 @register.filter
 def add_color(tag):
-    colors = {
-        'breakfast': 'orange',
-        'lunch': 'green',
-        'dinner': 'purple'
-    }
+    colors = {entry['slug']: entry['colors'] for entry in
+              Tag.objects.values('slug', 'colors')}
     return colors[tag.slug]
 
 
@@ -50,3 +45,23 @@ def renew_tag_link(request, tag):
     else:
         request_copy.appendlist('tag', tag.slug)
     return request_copy.urlencode()
+
+
+@register.filter
+def is_favorite(recipe, user):
+    return Favorite.favorite.filter(recipes=recipe, user=user).exists()
+
+
+@register.filter
+def is_purchase(recipe, user):
+    return Purchase.purchase.filter(recipes=recipe, user=user).exists()
+
+
+@register.filter
+def is_subscribe(author, user):
+    return Subscription.objects.filter(author=author, user=user).exists()
+
+
+@register.filter
+def all_tags(value):
+    return Tag.objects.all()
