@@ -65,7 +65,7 @@ def get_ingredients_from_form(request, recipe):
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
-def new_recipe(request):
+def new_recipe_view(request):
     form = RecipeForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         recipe = form.save(commit=False)
@@ -102,18 +102,18 @@ def profile_view(request, user_id):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {'username': request.user.username,
-               'title': author.first_name,
+               'author': author,
                'page': page,
                'paginator': paginator
                }
     user = request.user
     if user.is_authenticated:
         context = extend_context(context, user)
-    return render(request, 'recipes/indexAuth.html', context)
+    return render(request, 'recipes/profile.html', context)
 
 
 @require_GET
-def recipe_item(request, recipe_id):
+def recipe_item_view(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     context = {
         'recipe': recipe,
@@ -124,7 +124,7 @@ def recipe_item(request, recipe_id):
 
 @login_required(login_url='auth/login/')
 @require_http_methods(['GET', 'POST'])
-def recipe_edit(request, recipe_id):
+def recipe_edit_view(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if request.user != recipe.author:
         return redirect('recipe_view', recipe_id=recipe_id)
@@ -162,7 +162,7 @@ def recipe_delete(request, recipe_id):
 
 @login_required(login_url='auth/login/')
 @require_GET
-def followers(request):
+def followers_view(request):
     try:
         subscriptions = Subscription.objects.filter(
             user=request.user).order_by('pk')

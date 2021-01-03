@@ -21,7 +21,7 @@
             {% endfor %}
             {% if author.author.recipe_author.count > 3 %}
                 <li class="card-user__item">
-                    <a href="{% url 'profile' user_id=author.author.id %}" class="card-user__link link">Еще {{ author.author.recipe_author.count|subtract:'3' }} рецептов...</a>
+                    <a href="{% url 'profile_view' user_id=author.author.id %}" class="card-user__link link">Еще {{ author.author.recipe_author.count|subtract:'3' }} рецептов...</a>
                 </li>
             {% endif %}
         </ul>

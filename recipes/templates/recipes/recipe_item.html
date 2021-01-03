@@ -18,7 +18,7 @@
         </ul>
         <div class="card__items card__items_column">
             <p class="card__text"><span class="icon-time"></span>{{ recipe.cook_time }} мин.</p>
-            <p class="card__text"><span class="icon-user"></span> <a href="{% url 'profile' user_id=recipe.author.id %}" style="color: black"> {{ recipe.author.first_name }}</a></p>
+            <p class="card__text"><span class="icon-user"></span> <a href="{% url 'profile_view' user_id=recipe.author.id %}" style="color: black"> {{ recipe.author.first_name }}</a></p>
         </div>
     </div>
     <div class="card__footer">
@@ -26,10 +26,10 @@
             {% if recipe|is_purchase:request.user %}
                 <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-check button__icon"></span>Рецепт добавлен</button>
             {% else %}
-                <button class="button button_style_light-blue" name="purchases" ><span class="icon-plus  button__icon"></span>Добавить в покупки{% endif %}</button>
+                <button class="button button_style_light-blue" name="purchases" ><span class="icon-plus  button__icon"></span>Добавить в покупки</button>
             {% endif %}
 
             {% include "recipes/favorite_star.html" with recipe=recipe %}
-
+        {% endif %}
     </div>
 </div>
