@@ -1,3 +1,5 @@
+import csv
+
 from django.test import TestCase, Client
 from django.urls import reverse
 from .models import User, Recipe, Tag, Product, Ingredient, Favorite, Purchase
@@ -18,7 +20,7 @@ def _create_recipe(author, name, tag):
     return recipe
 
 
-class TestPageHeader(TestCase):
+class TestPageHeader(TestCase):#OK
     """
     Тесты для шапки страницы.
 
@@ -36,7 +38,7 @@ class TestPageHeader(TestCase):
             email='test@test.test',
             password='12345six')
 
-    def test_not_auth_user(self):
+    def test_not_auth_user(self):#OK
         response = self.client.get(reverse('index_view'))
         self.assertEqual(
             response.status_code, 200,
@@ -51,7 +53,7 @@ class TestPageHeader(TestCase):
             msg=('У неавторизованного юзера в шапке не должно быть'
                  ' пункта Создать рецепт'))
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
         response = self.client.get(reverse('index_view'))
         html = f'<a href="{reverse("login")}" class="nav__link link">Войти'
@@ -73,7 +75,7 @@ class TestPageHeader(TestCase):
             msg='У авторизованного юзера в шапке должен быть счетчик покупок')
 
 
-class TestTagFilter(TestCase):
+class TestTagFilter(TestCase):#OK
     """
     Тесты для фильтрации по тегам.
 
@@ -96,7 +98,7 @@ class TestTagFilter(TestCase):
             else:
                 _create_recipe(self.user, f'recipe {i}', tag1)
 
-    def test_filter(self):
+    def test_filter(self):#OK
         print(10)
         urls = [
             f'{reverse("index_view")}?tag=lunch',
@@ -122,7 +124,7 @@ class TestTagFilter(TestCase):
             msg='Фильтры должны правильно работать на странице с избранным')
 
 
-class TestProfile(TestCase):
+class TestProfile(TestCase):#OK
     """
     Тесты для страницы профиля.
 
@@ -145,7 +147,7 @@ class TestProfile(TestCase):
             password='onetwo34',
             first_name='Another test user first_name')
 
-    def test_not_auth_user(self):
+    def test_not_auth_user(self):#OK
         response = self.client.get(reverse('profile_view', args=[self.user.id]))
         self.assertEqual(
             response.status_code, 200,
@@ -156,27 +158,26 @@ class TestProfile(TestCase):
             msg=('В профиле для незалогиненного юзера не должно быть'
                  ' кнопки подписки'))
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
         response = self.client.get(reverse('profile_view', args=[self.user.id]))
         self.assertEqual(
             response.status_code, 200,
             msg='Авторизованный пользователь может просматривать свой профиль')
-        # subscribe_btn = 'light-blue button_size_auto" name="subscribe"'
-        subscribe_btn = f'<a href = "{reverse("profile_view", args=[self.user.id])}" style = "color: black">{self.user.first_name}</a>'
-        #<a href = "/profile/30" style = "color: black">tang2</a>
+        subscribe_btn = 'name="subscribe"'
         self.assertNotIn(
             subscribe_btn, response.content.decode(),
             msg=('В своем профиле для авторизованного юзера не должно'
                  ' быть кнопки подписки'))
         response2 = self.client.get(reverse('profile_view', args=[self.user2.id]))
+
         self.assertIn(
             subscribe_btn, response2.content.decode(),
             msg=('Для авторизованного юзера в профиле другого юзера должна'
                  ' быть кнопка подписки'))
 
 
-class TestRecipePage(TestCase):
+class TestRecipePage(TestCase):#OK
     """
     Тесты страницы отдельного рецепта.
 
@@ -194,47 +195,50 @@ class TestRecipePage(TestCase):
         self.user = User.objects.create(
             username='Test user',
             email='test@test.test',
-            password='12345six')
+            password='12345six',
+            first_name='Test user first_name')
         self.user2 = User.objects.create(
             username='Another test user',
             email='another@test.test',
-            password='onetwo34')
+            password='onetwo34',
+            first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Test recipe', tag)
         self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
 
-    def test_not_auth_user(self):
-        response = self.client.get(reverse('recipe', args=[self.recipe.id]))
+    def test_not_auth_user(self):#OK
+        response = self.client.get(reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
             response.status_code, 200,
             msg=('Страница отдельного рецепта должна быть доступна'
                  ' неавторизованному юзеру'))
-        elements = {
-            'избранное': 'button_style_none" name="favorites"',
-            'подписки': 'light-blue button_size_auto" name="subscribe"',
-            'покупок': 'button_style_blue" name="purchpurchases"'
-        }
-        for i in elements:
-            self.assertNotIn(elements[i], response.content.decode(),
-                             msg=(f'Кнопка {i} не должна быть на странице для '
+        elements = [
+            ['избранное', 'button_style_none" name="favorites"'],
+            ['подписки', 'light-blue button_size_auto" name="subscribe"'],
+            ['покупок', 'button_style_blue" name="purchpurchases"']
+        ]
+        print(10)
+        for button, element in elements:
+            self.assertNotIn(element, response.content.decode(),
+                             msg=(f'Кнопка {button} не должна быть на странице для '
                                   'неавторизованного пользователя'))
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
         # Запрос за страницу своего рецепта
-        response1 = self.client.get(reverse('recipe', args=[self.recipe.id]))
+        response1 = self.client.get(reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
             response1.status_code, 200,
             msg=('Страница отдельного рецепта должна быть доступна'
                  ' авторизованному юзеру'))
-        elements = {
-            'избранное': 'button_style_none" name="favorites"',
-            'список покупок': 'button_style_blue" name="purchpurchases"'
-        }
-        for i in elements:
+        elements = [
+            ['избранное', 'button_style_none" name="favorites"'],
+            ['список покупок', 'button_style_blue" name="purchases"']
+        ]
+        for button, element in elements:
             self.assertIn(
-                elements[i], response1.content.decode(),
-                msg=(f'Кнопка {i} должна быть на странице для'
+                element, response1.content.decode(),
+                msg=(f'Кнопка {button} должна быть на странице для'
                      ' залогиненного юзера'))
         subscibe_btn = 'light-blue button_size_auto" name="subscribe"'
         self.assertNotIn(
@@ -243,16 +247,16 @@ class TestRecipePage(TestCase):
         self.assertIn(
             'Редактировать рецепт', response1.content.decode(),
             msg='На странице своего рецепта должна быть кнопка редактировать'),
-        elements['подписка на автора'] = subscibe_btn
+        elements.append(['подписка на автора', subscibe_btn])
         # Запрос на страницу чужого рецепта
-        response2 = self.client.get(reverse('recipe', args=[self.recipe2.id]))
+        response2 = self.client.get(reverse('recipe_view', args=[self.recipe2.id]))
         self.assertEqual(
             response2.status_code, 200,
             msg='Страница чужого рецепта доступна авторизованному юзеру')
-        for i in elements:
+        for button, element in elements:
             self.assertIn(
-                elements[i], response2.content.decode(),
-                msg=(f'Кнопка {i} должна быть на странице для'
+                element, response2.content.decode(),
+                msg=(f'Кнопка {button} должна быть на странице для'
                      ' залогиненного юзера'))
         self.assertNotIn(
             'Редактировать рецепт', response2.content.decode(),
@@ -275,7 +279,8 @@ class TestFavoritePage(TestCase):
         self.user = User.objects.create(
             username='Test user',
             email='test@test.test',
-            password='12345six')
+            password='12345six',
+            first_name='Test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)
         _create_recipe(self.user, 'Unfavorite recipe', tag)
@@ -283,17 +288,16 @@ class TestFavoritePage(TestCase):
         favorite.save()
         favorite.recipes.add(Recipe.recipes.get(id=1))
 
-    def test_not_auth_user(self):
-        response = self.client.get(reverse('favorite'), follow=True)
-        redirect_url = f'{response.redirect_chain[0][0].split("?")[0]}/'
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('GET-запрос на страницу избранного для неавторизованного'
-                 ' юзера должно перенаправлять на страницу входа'))
+    def test_not_auth_user(self):#OK
+        response = self.client.get(reverse('favorite_view'), follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("favorite_view")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='GET-запрос на страницу избранного для неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
-        response = self.client.get(reverse('favorite'), follow=True)
+        response = self.client.get(reverse('favorite_view'), follow=True)
         self.assertEqual(
             response.status_code, 200,
             msg='Авторизованный юзер может зайти на страницу избранного')
@@ -318,34 +322,37 @@ class TestSubscriptionPage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user1 = User.objects.create(
-            username='Cool user',
+        self.user = User.objects.create(
+            username='Test user',
             email='test@test.test',
-            password='12345six')
+            password='12345six',
+            first_name='Test user first_name')
         self.user2 = User.objects.create(
             username='Another test user',
             email='another@test.test',
-            password='onetwo34')
+            password='onetwo34',
+            first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user1, 'Test recipe', tag)
-        Subscription.objects.create(user=self.user2, author=self.user1)
+        self.recipe = _create_recipe(self.user, 'Test recipe', tag)
+        Subscription.objects.create(user=self.user2, author=self.user)
 
-    def test_not_auth_user(self):
-        response = self.client.get(reverse('my_subscriptions'), follow=True)
-        redirect_url = f'/{response.redirect_chain[0][0].split("?")[0]}'
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('GET-запрос на страницу подписок неавторизованного'
-                 ' юзера должен направлять на страницу входа'))
+    def test_not_auth_user(self):#OK
+        response = self.client.get(reverse('subscriptions'), follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("subscriptions")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='GET-запрос на страницу подписок неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user(self):
+
+
+    def test_auth_user(self):#OK
         self.client.force_login(self.user2)
-        response = self.client.get(reverse('my_subscriptions'), follow=True)
+        response = self.client.get(reverse('followers_view'), follow=True)
         self.assertEqual(
             response.status_code, 200,
             msg='Страница подписок доступна авторизованному юзеру')
         self.assertIn(
-            'Cool user', response.content.decode(),
+            'Test user first_name', response.content.decode(),
             msg='На странице подписок должен быть добавленный автор')
 
 
@@ -362,55 +369,67 @@ class TestPurchasePage(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34')
+            username='Test user',
+            email='test@test.test',
+            password='12345six',
+            first_name='Test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         purchase = Purchase(user=self.user)
         purchase.save()
         purchase.recipes.add(self.recipe)
 
-    def test_not_auth_user(self):
-        response = self.client.get(reverse('purchases'), follow=True)
-        redirect_url = response.redirect_chain[0][0].split('?')[0] + '/'
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('GET-запрос на страницу покупок должен неавторизованного'
-                 ' юзера направлять на страницу входа'))
+    def test_not_auth_user(self):#OK
+        response = self.client.get(reverse('purchases_view'), follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("purchases_view")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='GET-запрос на страницу покупок должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
-        response = self.client.get(reverse('purchases'), follow=True)
+        response = self.client.get(reverse('purchases_view'), follow=True)
         self.assertEqual(
             response.status_code, 200,
             msg='Страница покупок должна быть доступна авторизованному юзеру')
         self.assertIn(
-            'Cool recipe', response.content.decode(),
+            'Test user first_name', response.content.decode(),
             msg='На странице покупок должен быть добавленный рецепт')
 
 
 class TestIngredientQuery(TestCase):
+    """
+    Тесты запросов ингридиентов.
+
+    Для неавторизованного пользователя проверяет, что страница недоступна и
+    пользователь перенаправляется на страницу входа.
+    Для авторизованного пользователя проверяется, что страница доступна и что
+    на странице присутствует рецепт добавленный в покупки.
+    """
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34'
-        )
+            username='Test user',
+            email='test@test.test',
+            password='12345six',
+            first_name='Test user first_name')
+        with open('recipes/fixtures/ingredients.csv') as isfile:
+            reader = csv.reader(isfile)
+            for row in reader:
+                title, unit = row
+                Product.objects.get_or_create(title=title, unit=unit)
 
-    def test_not_auth_user(self):
-        response = self.client.get('/ingredients?query=хл', follow=True)
-        redirect_url = f'/{response.redirect_chain[0][0].split("?")[0]}'
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('GET-запрос ингредиента должен неавторизованного'
-                 ' юзера перенаправлять на страницу входа'))
+    def test_not_auth_user(self):#OK
+        response = self.client.get(f'{reverse("ingredients")}?query=хл', follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("ingredients")}%3Fquery%3D%25C3%2591%25C2%2585%25C3%2590%25C2%25BB'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='GET-запрос ингредиента должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user(self):
+    def test_auth_user(self):#OK
         self.client.force_login(self.user)
         query = 'чай'
-        response = self.client.get(f'/ingredients?query={query}')
+        response = self.client.get(f'{reverse("ingredients")}?query={query}', format='json')
         data = response.json()
         self.assertIsInstance(
             data, list, msg='Пришедшие данные должны иметь тип list')
@@ -432,34 +451,37 @@ class TestFavoriteButton(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34')
+            username='Test user',
+            email='test@test.test',
+            password='12345six',
+            first_name='Test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
-    def test_not_auth_user(self):
+    def test_not_auth_user(self):#OK
         response = self.client.post(
-            reverse('favorite'), data=self.data,
+            reverse('favorite_view'), data=self.data,
             content_type='application/json', follow=True)
-        redirect_url = f"{response.redirect_chain[0][0].split('?')[0]}/"
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запрос на добавление в избранное должен неавторизованного'
-                 ' юзера перенаправлять на страницу входа'))
-        response = self.client.delete(
-            reverse('delete_favorite', args=[self.recipe.id]),
-            content_type='application/json', follow=True)
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запрос на удаление из избранного должен неавторизованного'
-                 ' юзера направлять на страницу входа'))
+        redirect_url = f'{reverse("login")}?next={reverse("favorite_view")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='Запрос на добавление в избранное должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user_add(self):
+        response = self.client.delete(
+            reverse('favorite_delete', args=[self.recipe.id]),
+            content_type='application/json', follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("favorite_delete", args=[self.recipe.id])}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='Запрос на удаление из избранного должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
+
+
+
+    def test_auth_user_add(self):#OK
         self.client.force_login(self.user)
         response = self.client.post(
-            reverse('favorite'), data=self.data,
+            reverse('favorite_view'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming = response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -472,7 +494,7 @@ class TestFavoriteButton(TestCase):
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
             msg='Должна создаваться соответствующая запись в бд')
         repeat_response = self.client.post(
-            reverse('favorite'), data=self.data,
+            reverse('favorite_view'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
@@ -482,13 +504,13 @@ class TestFavoriteButton(TestCase):
             user=self.user).recipes.filter(id=self.recipe.id).count(), 1,
             msg='Не должна создаваться повторная запись в бд')
 
-    def test_auth_user_delete(self):
+    def test_auth_user_delete(self):#OK
         self.client.force_login(self.user)
         self.client.post(
-            reverse('favorite'), data=self.data,
+            reverse('favorite_view'), data=self.data,
             content_type='application/json', follow=True)
         del_response = self.client.delete(
-            reverse('delete_favorite', args=[self.recipe.id]),
+            reverse('favorite_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming = del_response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -501,7 +523,7 @@ class TestFavoriteButton(TestCase):
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
             msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
-            reverse('delete_favorite', args=[self.recipe.id]),
+            reverse('favorite_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(
@@ -513,36 +535,38 @@ class TestSubscriptionButton(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create(
+            username='Test user',
+            email='test@test.test',
+            password='12345six',
+            first_name='Test user first_name')
+        self.user2 = User.objects.create(
             username='Another test user',
             email='another@test.test',
-            password='onetwo34')
-        self.user2 = User.objects.create(
-            username='Cool guy',
-            email='another@test.test',
-            password='onetwo34')
+            password='onetwo34',
+            first_name='Another test user first_name')
         self.data = {'id': f'{self.user2.id}'}
 
-    def test_not_auth_user(self):
+    def test_not_auth_user(self):#OK
         response = self.client.post(
-            reverse('subscription'), data=self.data,
+            reverse('subscriptions'), data=self.data,
             content_type='application/json', follow=True)
-        redirect_url = f"/{response.redirect_chain[0][0].split('?')[0]}"
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запрос на добавление в подписки должно неавторизованного'
-                 ' юзера направлять на страницу входа'))
-        response = self.client.delete(
-            reverse('delete_subscription', args=[self.user2.id]),
-            content_type='application/json', follow=True)
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запрос на удаление из подписки должен неавторизованного'
-                 ' юзера направлять на страницу входа'))
+        redirect_url = f'{reverse("login")}?next={reverse("subscriptions")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='Запрос на добавление в подписки должно неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
 
-    def test_auth_user_add(self):
+        response = self.client.delete(
+            reverse('followers_delete', args=[self.user2.id]),
+            content_type='application/json', follow=True)
+        redirect_url = f'{reverse("login")}?next={reverse("followers_delete", args=[self.user2.id])}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='Запрос на удаление из подписки должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
+
+    def test_auth_user_add(self):#OK
         self.client.force_login(self.user)
         response = self.client.post(
-            reverse('subscription'), data=self.data,
+            reverse('subscriptions'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming = response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -555,7 +579,7 @@ class TestSubscriptionButton(TestCase):
             user=self.user, author=self.user2).exists(),
             msg='Должна создаваться соответствующая запись в бд')
         repeat_response = self.client.post(
-            reverse('subscription'), data=self.data,
+            reverse('subscriptions'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
@@ -565,13 +589,13 @@ class TestSubscriptionButton(TestCase):
             user=self.user, author=self.user2).count(), 1,
             msg='Не должна создаваться повторная запись в бд')
 
-    def test_auth_user_delete(self):
+    def test_auth_user_delete(self):#OK
         self.client.force_login(self.user)
         self.client.post(
-            reverse('subscription'), data=self.data,
+            reverse('subscriptions'), data=self.data,
             content_type='application/json', follow=True)
         del_response = self.client.delete(
-            reverse('delete_subscription', args=[self.user2.id]),
+            reverse('followers_delete', args=[self.user2.id]),
             content_type='application/json', follow=True)
         data_incoming = del_response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -584,7 +608,7 @@ class TestSubscriptionButton(TestCase):
             user=self.user, author=self.user2).exists(),
             msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
-            reverse('delete_subscription', args=[self.user2.id]),
+            reverse('followers_delete', args=[self.user2.id]),
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(
@@ -603,27 +627,27 @@ class TestPurchaseButton(TestCase):
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
-    def test_not_auth_user(self):
+    def test_not_auth_user(self):#OK
         response = self.client.post(
-            reverse('purchases'), data=self.data,
+            reverse('purchases_view'), data=self.data,
             content_type='application/json', follow=True)
-        redirect_url = f"{response.redirect_chain[0][0].split('?')[0]}/"
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запрос на добавление в покупки должен неавторизованного'
-                 ' юзера направлять на страницу входа'))
+        redirect_url = f'{reverse("login")}?next={reverse("purchases_view")}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix='Запрос на добавление в покупки должен неавторизованного'
+                 ' юзера должно перенаправлять на страницу входа')
+
         response = self.client.delete(
-            reverse('delete_purchase', args=[self.recipe.id]),
+            reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
-        self.assertEqual(
-            reverse('login'), redirect_url,
-            msg=('Запросе на удаление из покупок должен неавторизованного'
+        redirect_url = f'{reverse("login")}?next={reverse("purchase_delete", args=[self.recipe.id])}'
+        self.assertRedirects(response, redirect_url,
+            msg_prefix=('Запросе на удаление из покупок должен неавторизованного'
                  ' юзера направлять на страницу входа'))
 
-    def test_auth_user_add(self):
+    def test_auth_user_add(self):#OK
         self.client.force_login(self.user)
         response = self.client.post(
-            reverse('purchases'), data=self.data,
+            reverse('purchases_view'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming = response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -636,7 +660,7 @@ class TestPurchaseButton(TestCase):
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
             msg='Должна создаваться соответствующая запись в бд')
         repeat_response = self.client.post(
-            reverse('purchases'), data=self.data,
+            reverse('purchases_view'), data=self.data,
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
@@ -647,12 +671,12 @@ class TestPurchaseButton(TestCase):
             .recipes.filter(id=self.recipe.id).count(), 1,
             msg='Не должна создаваться повторная запись в бд')
 
-    def test_auth_user_delete(self):
+    def test_auth_user_delete(self):#OK
         self.client.force_login(self.user)
-        self.client.post(reverse('purchases'), data=self.data,
+        self.client.post(reverse('purchases_view'), data=self.data,
                          content_type='application/json', follow=True)
         del_response = self.client.delete(
-            reverse('delete_purchase', args=[self.recipe.id]),
+            reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming = del_response.json()
         self.assertIsInstance(data_incoming, dict,
@@ -666,7 +690,7 @@ class TestPurchaseButton(TestCase):
             .recipes.filter(id=self.recipe.id).exists(),
             msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
-            reverse('delete_purchase', args=[self.recipe.id]),
+            reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(

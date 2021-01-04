@@ -63,7 +63,7 @@ def get_ingredients_from_form(request, recipe):
     return ingredients
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def new_recipe_view(request):
     form = RecipeForm(request.POST or None, files=request.FILES or None)
@@ -73,7 +73,7 @@ def new_recipe_view(request):
         form.save()
         ingredients = get_ingredients_from_form(request, recipe)
         Ingredient.objects.bulk_create(ingredients)
-        return redirect('index')
+        return redirect('index_view')
     context = {'username': request.user.username,
                'page_title': 'Создание рецепта',
                'button': 'Создать рецепт',
@@ -85,7 +85,7 @@ def new_recipe_view(request):
     return render(request, 'recipes/formRecipe.html', context)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods(["GET"])
 def get_ingredients(request):
     query = unquote(request.GET.get('query'))
@@ -122,7 +122,7 @@ def recipe_item_view(request, recipe_id):
     return render(request, 'recipes/singlePage.html', context)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def recipe_edit_view(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -152,15 +152,15 @@ def recipe_edit_view(request, recipe_id):
     return render(request, 'recipes/formRecipe.html', context)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_GET
 def recipe_delete(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     recipe.delete()
-    return redirect('index')
+    return redirect('index_view')
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_GET
 def followers_view(request):
     try:
@@ -182,7 +182,7 @@ def followers_view(request):
     return render(request, 'recipes/myFollow.html', context)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods('DELETE')
 def delete_subscription(request, author_id):
     author = get_object_or_404(User, id=author_id)
@@ -195,14 +195,9 @@ def delete_subscription(request, author_id):
     return JsonResponse(data)
 
 
-@login_required(login_url='auth/login/')
-@require_http_methods(['GET', 'POST'])
-#TODO Советую подумать над названиями, потому что название вью-функции не
-# отображает, что в ней будет происходить. Особенно если учесть, что в ней
-# может происходить абсолютно разные действия. Заодно советую глянуть остальные
-# функции, просто здесь очень ярко эта проблема видна. что "избранное"? А вот
-# "добавить в избранное" или "получить избранное" - уже понятно
 
+@login_required(login_url='login')
+@require_http_methods(['GET', 'POST'])
 def favorite_view(request):
     if request.method == 'GET':
         tags = request.GET.getlist('tag')
@@ -236,7 +231,7 @@ def favorite_view(request):
         return JsonResponse(data)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods('DELETE')
 def favorite_delete(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -251,7 +246,7 @@ def favorite_delete(request, recipe_id):
     return JsonResponse(data)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def purchase(request):
     if request.method == 'GET':
@@ -279,13 +274,11 @@ def purchase(request):
         return JsonResponse(data)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_http_methods('DELETE')
 def purchase_delete(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    data = {
-        'success': 'true'
-    }
+    data = { 'success': 'true' }
     try:
         purchase = Purchase.purchase.get(user=request.user)
     except ObjectDoesNotExist:
@@ -296,7 +289,7 @@ def purchase_delete(request, recipe_id):
     return JsonResponse(data)
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_GET
 def send_shop_list(request):
     user = request.user
@@ -316,7 +309,7 @@ def send_shop_list(request):
     return response
 
 
-@login_required(login_url='auth/login/')
+@login_required(login_url='login')
 @require_POST
 def subscriptions(request):
     json_data = json.loads(request.body.decode())

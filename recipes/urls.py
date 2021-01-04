@@ -7,7 +7,7 @@ urlpatterns = [
     path('profile/<int:user_id>', views.profile_view, name='profile_view'),
     path('favorites', views.favorite_view, name='favorite_view'),
     path('favorites/<int:recipe_id>', views.favorite_delete,
-         name='delete_favorite'),
+         name='favorite_delete'),
     path('subscriptions', views.subscriptions, name='subscriptions'),
     path('subscriptions/<int:author_id>', views.delete_subscription,
          name='followers_delete'),
@@ -21,7 +21,7 @@ urlpatterns = [
          name='recipe_delete'),
     path('purchases', views.purchase, name='purchases_view'),
     path('purchases/<int:recipe_id>', views.purchase_delete,
-         name='delete_purchase'),
+         name='purchase_delete'),
     path('shoplist', views.send_shop_list, name='shoplist'),
     path('ingredients/', views.get_ingredients, name='ingredients'),
 ]
