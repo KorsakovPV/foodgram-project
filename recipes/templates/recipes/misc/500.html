@@ -13,7 +13,7 @@
         <div class="main__header">
             <h1>Ошибка 500</h1>
             <p class="lead">Ошибка на сервере, попробуйте обновить страницу или обратиться позже</p>
-            <p class="lead"><a href="{% url 'index' %}">Вернуться на главную</a></p>
+            <p class="lead"><a href="{% url 'index_view' %}">Вернуться на главную</a></p>
         </div>
         <div class="card-list">
             {% for recipe in page %}

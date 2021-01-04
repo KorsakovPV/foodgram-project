@@ -4,6 +4,8 @@ from recipes.models import Recipe, Tag
 
 
 class RecipeForm(forms.ModelForm):
+    """Форма для создания и редактирования рецепта."""
+
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'tags__checkbox'}),

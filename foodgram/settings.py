@@ -130,7 +130,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-LOGIN_REDIRECT_URL = 'index'
+LOGIN_REDIRECT_URL = 'index_view'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -143,8 +143,13 @@ STATIC_URL = '/static/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
+# AUTHENTICATION_BACKENDS = 'django.contrib.auth.backends.ModelBackend'
+
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+RECIPES_ON_PAGE = 6

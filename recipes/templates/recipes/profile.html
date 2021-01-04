@@ -1,0 +1,59 @@
+{% extends 'recipes/base.html' %}
+{% block title %}Рецепты{% endblock %}
+{% load user_filters %}
+
+{% block styles %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+{% endblock %}
+
+{% block content %}
+    <main class="main container">
+        <div class="main__header">
+            <h1 class="main__title">
+                {% if author.first_name %}
+                    {{ author.first_name }}
+                {% else %}
+                    {{ author.username }}
+                {% endif %}
+            </h1>
+            {% include 'recipes/tags.html' %}
+        </div>
+
+        {% if request.user.is_authenticated and request.user != author %}
+            <div class="author-subscribe" data-author="{{ author.id }}">
+                <p style="padding: 0 0 2em 0;">
+                    {% if recipe.author|is_subscribe:request.user %}
+                        <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline button_style_blue" name="subscribe">Отписаться от автора</button>
+                    {% else %}
+                        <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline" name="subscribe" data-out="true">Подписаться на автора</button>
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+
+
+        <div class="card-list">
+            {% for recipe in page %}
+                {% include "recipes/recipe_item.html" with recipe=recipe %}
+            {% endfor %}
+        </div>
+        {% include 'recipes/paginator.html' with page=page paginator=paginator %}
+    </main>
+{% endblock %}
+
+{% block javascript %}
+{% load static %}
+
+    <script src="{% static 'js/components/MainCards.js' %}"></script>
+    <script src="{% static 'js/components/Purchases.js' %}"></script>
+    <script src="{% static 'js/components/Favorites.js' %}"></script>
+    <script src="{% static 'js/components/Subscribe.js' %}"></script>
+    <script src="{% static 'js/config/config.js' %}"></script>
+    <script src="{% static 'js/components/AuthorRecipe.js' %}"></script>
+    <script src="{% static 'js/components/Header.js' %}"></script>
+    <script src="{% static 'js/api/Api.js' %}"></script>
+    <script src="{% static 'authorRecipe.js' %}"></script>
+
+{% endblock %}
+
