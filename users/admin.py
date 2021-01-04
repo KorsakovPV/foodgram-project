@@ -7,6 +7,8 @@ User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Описание полей для сайта администрирования"""
+
     model = User
     list_display = ('pk', 'username', 'first_name', 'email',)
     list_filter = ('username', 'email',)

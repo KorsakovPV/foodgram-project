@@ -24,9 +24,9 @@
     <div class="card__footer">
         {% if request.user.is_authenticated %}
             {% if recipe|is_purchase:request.user %}
-                <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-check button__icon"></span>Рецепт добавлен</button>
+                <button class="button button_style_light-blue" name="purchases" ><span class="icon-check button__icon"></span>Рецепт добавлен</button>
             {% else %}
-                <button class="button button_style_light-blue" name="purchases" ><span class="icon-plus  button__icon"></span>Добавить в покупки</button>
+                <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-plus  button__icon"></span>Добавить в покупки</button>
             {% endif %}
 
             {% include "recipes/favorite_star.html" with recipe=recipe %}

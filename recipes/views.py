@@ -21,6 +21,8 @@ from foodgram.settings import RECIPES_ON_PAGE
 
 
 def extend_context(context, user):
+    """Добавляет в контекст количество продуктов в списке покупок."""
+
     context['ingredient_count'] = Ingredient.objects.select_related(
         'ingredient').filter(recipe__purchase__user=user).values(
         'ingredient__title', 'ingredient__unit').annotate(
@@ -30,6 +32,8 @@ def extend_context(context, user):
 
 @require_GET
 def index_view(request):
+    """Главная страница сайта."""
+
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
     paginator = Paginator(recipes, RECIPES_ON_PAGE)
@@ -48,6 +52,8 @@ def index_view(request):
 
 
 def get_ingredients_from_form(request, recipe):
+    """Получает ингридиенты рецепта из формы и возвращает их списком."""
+
     ingedient_names = request.POST.getlist('nameIngredient')
     ingredient_units = request.POST.getlist('unitsIngredient')
     amounts = request.POST.getlist('valueIngredient')
@@ -66,6 +72,8 @@ def get_ingredients_from_form(request, recipe):
 @login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def new_recipe_view(request):
+    """Создание нового рецепта."""
+
     form = RecipeForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         recipe = form.save(commit=False)
@@ -88,6 +96,11 @@ def new_recipe_view(request):
 @login_required(login_url='login')
 @require_http_methods(["GET"])
 def get_ingredients(request):
+    """
+    Получает из request строку запроса. Выполяет поиск в базе ингридеенов по
+    их названию. Возвращает JSON.
+    """
+
     query = unquote(request.GET.get('query'))
     data = list(Product.objects.filter(title__startswith=query).values('title',
                                                                        'unit'))
@@ -95,6 +108,8 @@ def get_ingredients(request):
 
 
 def profile_view(request, user_id):
+    """Станица с рецептами одного автора."""
+
     author = get_object_or_404(User, id=user_id)
     tags = request.GET.getlist('tag')
     recipes = Recipe.recipes.tag_filter(tags)
@@ -114,6 +129,8 @@ def profile_view(request, user_id):
 
 @require_GET
 def recipe_item_view(request, recipe_id):
+    """Страница с одним рецепттом."""
+
     recipe = get_object_or_404(Recipe, id=recipe_id)
     context = {
         'recipe': recipe,
@@ -125,6 +142,8 @@ def recipe_item_view(request, recipe_id):
 @login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def recipe_edit_view(request, recipe_id):
+    """Страница редактирования рецепта."""
+
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if request.user != recipe.author:
         return redirect('recipe_view', recipe_id=recipe_id)
@@ -155,6 +174,8 @@ def recipe_edit_view(request, recipe_id):
 @login_required(login_url='login')
 @require_GET
 def recipe_delete(request, recipe_id):
+    """Удаление рецепта."""
+
     recipe = get_object_or_404(Recipe, id=recipe_id)
     recipe.delete()
     return redirect('index_view')
@@ -163,6 +184,8 @@ def recipe_delete(request, recipe_id):
 @login_required(login_url='login')
 @require_GET
 def followers_view(request):
+    """Страница мои подписки."""
+
     try:
         subscriptions = Subscription.objects.filter(
             user=request.user).order_by('pk')
@@ -184,7 +207,9 @@ def followers_view(request):
 
 @login_required(login_url='login')
 @require_http_methods('DELETE')
-def delete_subscription(request, author_id):
+def subscription_delete(request, author_id):
+    """Отписка от подписки на автора."""
+
     author = get_object_or_404(User, id=author_id)
     data = {'success': 'true'}
     follow = Subscription.objects.filter(
@@ -199,6 +224,8 @@ def delete_subscription(request, author_id):
 @login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
 def favorite_view(request):
+    """Страница избранное и добавление рецепта в избранные"""
+
     if request.method == 'GET':
         tags = request.GET.getlist('tag')
         user = request.user
@@ -214,9 +241,6 @@ def favorite_view(request):
         user = request.user
         context = extend_context(context, user)
         return render(request, 'recipes/indexAuth.html', context)
-    #TODO Тут абсолютно разный код для двух разных запросов. Есть ли смысл
-    # держать их в одной функции? ИМХО, они настолько не связаны между собой,
-    # что было бы лучше их разделить по разным вью-функциям
     elif request.method == 'POST':
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
@@ -234,6 +258,8 @@ def favorite_view(request):
 @login_required(login_url='login')
 @require_http_methods('DELETE')
 def favorite_delete(request, recipe_id):
+    """Удаление рецепта из избранного"""
+
     recipe = get_object_or_404(Recipe, id=recipe_id)
     data = {'success': 'true'}
     try:
@@ -248,7 +274,9 @@ def favorite_delete(request, recipe_id):
 
 @login_required(login_url='login')
 @require_http_methods(['GET', 'POST'])
-def purchase(request):
+def purchase_view(request):
+    """Страница списка покупок. Добавление рецепта в список покупок"""
+
     if request.method == 'GET':
         recipes = Purchase.purchase.get_purchases_list(request.user)
         context = {
@@ -277,6 +305,8 @@ def purchase(request):
 @login_required(login_url='login')
 @require_http_methods('DELETE')
 def purchase_delete(request, recipe_id):
+    """Удаление рецепта из списка покупок"""
+
     recipe = get_object_or_404(Recipe, id=recipe_id)
     data = { 'success': 'true' }
     try:
@@ -292,6 +322,8 @@ def purchase_delete(request, recipe_id):
 @login_required(login_url='login')
 @require_GET
 def send_shop_list(request):
+    """Сохранение списка покупок"""
+
     user = request.user
     ingredients = Ingredient.objects.select_related('ingredient').filter(
         recipe__purchase__user=user).values('ingredient__title',
@@ -312,6 +344,8 @@ def send_shop_list(request):
 @login_required(login_url='login')
 @require_POST
 def subscriptions(request):
+    """Добапление подписки на авттора"""
+
     json_data = json.loads(request.body.decode())
     author = get_object_or_404(User, id=json_data['id'])
     is_exist = Subscription.objects.filter(
@@ -325,13 +359,15 @@ def subscriptions(request):
 
 
 def page_not_found(request, exception):
-    return render(
-        request,
-        'recipes/misc/404.html',
-        {'path': request.path},
-        status=404
-    )
+    """Обработчик ошибки 404."""
+
+    return render(request,
+                  'recipes/misc/404.html',
+                  {'path': request.path},
+                  status=404)
 
 
 def server_error(request):
+    """Обработчик ошибки 500."""
+
     return render(request, 'recipes/misc/500.html', status=500)

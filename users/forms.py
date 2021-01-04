@@ -5,6 +5,7 @@ User = get_user_model()
 
 
 class CreationForm(forms.ModelForm):
+    """Форма регистрации нового пользователя"""
     password = forms.CharField(
         label='Пароль',
         strip=False,
@@ -20,6 +21,11 @@ class CreationForm(forms.ModelForm):
         fields = ('first_name', 'username', 'email', 'password')
 
     def save(self, commit=True):
+        """
+        Переопледеляем метод для того чтоб после регистрации пользователь был
+        аутентифицирован
+        """
+
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
         if commit:
@@ -30,5 +36,3 @@ class CreationForm(forms.ModelForm):
             )
             login(self.request, auth_user)
         return user
-
-
