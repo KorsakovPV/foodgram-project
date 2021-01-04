@@ -4,11 +4,15 @@ from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe, Tag
 
 
 class IngredientInline(admin.TabularInline):
+    """Описание полей модели Ingredient для сайта администрирования"""
+
     model = Ingredient
     extra = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    """Описание полей модели Recipe для сайта администрирования"""
+
     model = Recipe
     list_display = ('pk', 'author', 'name', 'in_favorite_count',)
     list_filter = ('name', 'author', 'tags')
@@ -21,12 +25,16 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class ProductAdmin(admin.ModelAdmin):
+    """Описание полей модели Product для сайта администрирования"""
+
     model = Product
     list_display = ('pk', 'title', 'unit',)
     list_filter = ('title',)
 
 
 class FavoriteAdmin(admin.ModelAdmin):
+    """Описание полей модели Favorite для сайта администрирования"""
+
     model = Favorite
     list_display = ('pk', 'user', 'show_recipes',)
 
@@ -36,6 +44,8 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 class PurchaseAdmin(admin.ModelAdmin):
+    """Описание полей модели Purchase для сайта администрирования"""
+
     model = Favorite
     list_display = ('pk', 'user', 'show_recipes',)
 

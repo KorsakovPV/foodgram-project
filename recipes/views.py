@@ -13,11 +13,10 @@ from django.views.decorators.http import (
     require_POST
 )
 
+from foodgram.settings import RECIPES_ON_PAGE
 from recipes.forms import RecipeForm
 from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe, Tag
 from users.models import Subscription, User
-
-from foodgram.settings import RECIPES_ON_PAGE
 
 
 def extend_context(context, user):
@@ -135,7 +134,9 @@ def recipe_item_view(request, recipe_id):
     context = {
         'recipe': recipe,
     }
-
+    user = request.user
+    if user.is_authenticated:
+        context = extend_context(context, user)
     return render(request, 'recipes/singlePage.html', context)
 
 
@@ -292,9 +293,7 @@ def purchase_view(request):
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
         purchase = Purchase.purchase.get_user_purchase(user=request.user)
-        data = {
-            'success': 'true'
-        }
+        data = {'success': 'true'}
         if not purchase.recipes.filter(id=recipe_id).exists():
             purchase.recipes.add(recipe)
             return JsonResponse(data)
@@ -305,7 +304,7 @@ def purchase_view(request):
 @login_required(login_url='login')
 @require_http_methods('DELETE')
 def purchase_delete(request, recipe_id):
-    """Удаление рецепта из списка покупок"""
+    """Удаление рецепта из списка покупок."""
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
     data = { 'success': 'true' }
@@ -322,7 +321,7 @@ def purchase_delete(request, recipe_id):
 @login_required(login_url='login')
 @require_GET
 def send_shop_list(request):
-    """Сохранение списка покупок"""
+    """Сохранение списка покупок."""
 
     user = request.user
     ingredients = Ingredient.objects.select_related('ingredient').filter(
@@ -344,7 +343,7 @@ def send_shop_list(request):
 @login_required(login_url='login')
 @require_POST
 def subscriptions(request):
-    """Добапление подписки на авттора"""
+    """Добапление подписки на авттора."""
 
     json_data = json.loads(request.body.decode())
     author = get_object_or_404(User, id=json_data['id'])

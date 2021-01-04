@@ -1,10 +1,11 @@
 import csv
 
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from users.models import Subscription
-from .models import User, Recipe, Tag, Product, Ingredient, Favorite, Purchase
+
+from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 
 def _create_recipe(author, name, tag):
@@ -221,7 +222,7 @@ class TestRecipePage(TestCase):
         elements = [
             ['избранное', 'button_style_none" name="favorites"'],
             ['подписки', 'light-blue button_size_auto" name="subscribe"'],
-            ['покупок', 'button_style_blue" name="purchpurchases"']
+            ['покупок', 'button_style_blue" name="purchases"']
         ]
         print(10)
         for button, element in elements:
