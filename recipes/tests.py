@@ -1,14 +1,14 @@
 import csv
 
+# import factory
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from users.models import Subscription
-
 from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 
-def _create_recipe2(author, name, tag):
+def _create_recipe(author, name, tag):
     products = [Product.objects.create(
         title=f'testIng{i}', unit=i) for i in range(2)]
     recipe = Recipe(author=author, name=name,
@@ -21,8 +21,33 @@ def _create_recipe2(author, name, tag):
         ingredient.save()
     return recipe
 
-def _create_recipe(author, name, tag):
-    pass
+
+# TODO Factoty boy
+# def _create_recipe(author, name, tag):
+#     recipe =
+#     pass
+
+# class UserFactory(factory.Factory):
+#     class Meta:
+#         model = User
+#
+#     username = 'Test user'
+#     email = 'test@test.test'
+#     password = '12345six'
+#     first_name = 'Test user first_name'
+#     admin = False
+
+
+def _create_user(username='Test user', email='test@test.test',
+                 password='12345six', first_name='Test user first_name'):
+    # user = UserFactory.create()
+    user = User.objects.create(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name)
+    return user
+
 
 class TestPageHeader(TestCase):
     """
@@ -37,10 +62,7 @@ class TestPageHeader(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six')
+        self.user = _create_user()
 
     def test_not_auth_user(self):
         response = self.client.get(reverse('index_view'))
@@ -89,10 +111,7 @@ class TestTagFilter(TestCase):
 
     def setUp(self):
         self.clent = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six')
+        self.user = _create_user()
         self.client.force_login(self.user)
         tag1 = Tag.objects.create(name='завтрак', slug='breakfast',
                                   colors='orange')
@@ -141,16 +160,11 @@ class TestProfile(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
 
     def test_not_auth_user(self):
         response = self.client.get(
@@ -200,16 +214,11 @@ class TestRecipePage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Test recipe', tag)
         self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
@@ -288,11 +297,7 @@ class TestFavoritePage(TestCase):
 
     def setUp(self):
         self.clent = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)
         _create_recipe(self.user, 'Unfavorite recipe', tag)
@@ -334,16 +339,11 @@ class TestSubscriptionPage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Test recipe', tag)
         Subscription.objects.create(user=self.user2, author=self.user)
@@ -378,11 +378,7 @@ class TestPurchasePage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         purchase = Purchase(user=self.user)
@@ -419,11 +415,7 @@ class TestIngredientQuery(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         with open('recipes/fixtures/ingredients.csv') as isfile:
             reader = csv.reader(isfile)
             for row in reader:
@@ -472,11 +464,7 @@ class TestFavoriteButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
@@ -563,16 +551,11 @@ class TestSubscriptionButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         self.data = {'id': f'{self.user2.id}'}
 
     def test_not_auth_user(self):
@@ -657,10 +640,7 @@ class TestPurchaseButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
