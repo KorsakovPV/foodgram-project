@@ -8,7 +8,7 @@ from users.models import Subscription
 from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 
-def _create_recipe(author, name, tag):
+def _create_recipe2(author, name, tag):
     products = [Product.objects.create(
         title=f'testIng{i}', unit=i) for i in range(2)]
     recipe = Recipe(author=author, name=name,
@@ -21,6 +21,8 @@ def _create_recipe(author, name, tag):
         ingredient.save()
     return recipe
 
+def _create_recipe(author, name, tag):
+    pass
 
 class TestPageHeader(TestCase):
     """

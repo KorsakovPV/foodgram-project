@@ -85,24 +85,24 @@ class Ingredient(models.Model):
 class PurchaseManager(models.Manager):
     """Менеджер модели список покупок."""
 
-    """
-    Фукция возвращает QuerySet рецептов списка покупок. Если таких рецепров
-    нет возвращает пустой лист.
-    """
-
     def get_purchases_list(self, user):
+        """
+        Фукция возвращает QuerySet рецептов списка покупок. Если таких рецепров
+        нет возвращает пустой лист.
+        """
+
         try:
             return super().get_queryset().get(user=user).recipes.all()
         except ObjectDoesNotExist:
             return []
 
-    """
-    Фукция возвращает все подписки пользователя QuerySet экземпляров класса 
-    Purchase для пользователя. Если подписок нет создает экземпляр класса 
-    Purchase для пользователя и возвращает его.
-    """
-
     def get_user_purchase(self, user):
+        """
+        Фукция возвращает все подписки пользователя QuerySet экземпляров класса
+        Purchase для пользователя. Если подписок нет создает экземпляр класса
+        Purchase для пользователя и возвращает его.
+        """
+
         try:
             return super().get_queryset().get(user=user)
         except ObjectDoesNotExist:
@@ -123,23 +123,23 @@ class Purchase(models.Model):
 class FavoriteManager(models.Manager):
     """Менеджер модели избранное."""
 
-    """
-    Фукция возвращает QuerySet рецептов добавленных в избранное. Если таких
-    рецепров нет возвращает пустой лист.
-    """
-
     def get_favorites(self, user):
+        """
+        Фукция возвращает QuerySet рецептов добавленных в избранное. Если таких
+        рецепров нет возвращает пустой лист.
+        """
+
         try:
             return super().get_queryset().get(user=user).recipes.all()
         except ObjectDoesNotExist:
             return []
 
-    """
-    Фукция возвращает QuerySet рецептов добавленных в избранное с учетом 
-    активных тегов. Если таких рецепров нет возвращает пустой лист.
-    """
-
     def get_tag_filtered(self, user, tags):
+        """
+        Фукция возвращает QuerySet рецептов добавленных в избранное с учетом
+        активных тегов. Если таких рецепров нет возвращает пустой лист.
+        """
+
         try:
             recipes = super().get_queryset().get(user=user).recipes.all()
             if tags:
@@ -155,13 +155,14 @@ class FavoriteManager(models.Manager):
         except ObjectDoesNotExist:
             return []
 
-    """
-    Фукция возвращает все подписки пользователя QuerySet экземпляров класса 
-    Favorite для пользователя. Если ибранных нет создает экземпляр класса 
-    Favorite для пользователя и возвращает его.
-    """
 
     def get_user(self, user):
+        """
+        Фукция возвращает все подписки пользователя QuerySet экземпляров класса
+        Favorite для пользователя. Если ибранных нет создает экземпляр класса
+        Favorite для пользователя и возвращает его.
+        """
+
         try:
             return super().get_queryset().get(user=user)
         except ObjectDoesNotExist:
