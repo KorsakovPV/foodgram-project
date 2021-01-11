@@ -7,30 +7,19 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.http import (
     require_GET,
     require_http_methods
 )
+from django.views.generic import CreateView
 
 from foodgram.settings import RECIPES_ON_PAGE
 from recipes.forms import RecipeForm
 from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe
 from users.models import Subscription, User
-
-
-def extend_context(context, user):
-    """Добавляет в контекст количество продуктов в списке покупок."""
-
-    context['ingredient_count'] = Ingredient.objects.select_related(
-        'ingredient').filter(recipe__purchase__user=user).values(
-        'ingredient__title', 'ingredient__unit').annotate(
-        total=Sum('amount')).count()
-    return context
-
-
-
 
 
 class IndexView(View):
@@ -48,15 +37,11 @@ class IndexView(View):
         paginator = Paginator(recipes, RECIPES_ON_PAGE)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
-        context = {'username': request.user.username,
-                   'title': 'Рецепты',
+        context = {'title': 'Рецепты',
                    'page': page,
                    'paginator': paginator,
                    'purchase': Purchase.purchase,
                    }
-        user = request.user
-        if user.is_authenticated:
-            context = extend_context(context, user)
         return render(request, 'recipes/indexAuth.html', context)
 
 
@@ -91,44 +76,11 @@ def new_recipe_view(request):
         ingredients = get_ingredients_from_form(request, recipe)
         Ingredient.objects.bulk_create(ingredients)
         return redirect('index_view')
-    context = {'username': request.user.username,
-               'page_title': 'Создание рецепта',
+    context = {'page_title': 'Создание рецепта',
                'button': 'Создать рецепт',
                'form': form,
                }
-    user = request.user
-    if user.is_authenticated:
-        context = extend_context(context, user)
     return render(request, 'recipes/formRecipe.html', context)
-
-
-# TODO переписать форму, ререписать вьюшку
-
-# @method_decorator(login_required, name='dispatch')
-# class NewRecipeView(View):
-#     def get(self, request):
-#         form = RecipeForm
-#         context = {'username': request.user.username,
-#                    'page_title': 'Создание рецепта',
-#                    'button': 'Создать рецепт',
-#                    'form': form,
-#                    }
-#         user = request.user
-#         if user.is_authenticated:
-#             context = extend_context(context, user)
-#         return render(request, 'recipes/formRecipe.html', context)
-#
-#     def post(self, request):
-#         form = RecipeForm(request.POST or None, files=request.FILES or None)
-#         if form.is_valid():
-#             recipe = form.save(commit=False)
-#             recipe.author = request.user
-#             form.save()
-#             ingredients = get_ingredients_from_form(request, recipe)
-#             Ingredient.objects.bulk_create(ingredients)
-#             return redirect('index_view')
-#         self.get(request)
-
 
 
 
@@ -137,8 +89,8 @@ def new_recipe_view(request):
 class GetIngredients(View):
     def get(self, request):
         """
-        Получает из request строку запроса. Выполяет поиск в базе ингридеенов по
-        их названию. Возвращает JSON.
+        Получает из request строку запроса. Выполяет поиск в базе ингридеенов
+        по их названию. Возвращает JSON.
         """
 
         query = unquote(request.GET.get('query'))
@@ -146,8 +98,6 @@ class GetIngredients(View):
             Product.objects.filter(title__startswith=query).values('title',
                                                                    'unit'))
         return JsonResponse(data, safe=False)
-
-
 
 
 class ProfileView(View):
@@ -166,14 +116,10 @@ class ProfileView(View):
         paginator = Paginator(recipes.filter(author=author), RECIPES_ON_PAGE)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
-        context = {'username': request.user.username,
-                   'author': author,
+        context = {'author': author,
                    'page': page,
                    'paginator': paginator
                    }
-        user = request.user
-        if user.is_authenticated:
-            context = extend_context(context, user)
         return render(request, 'recipes/profile.html', context)
 
 
@@ -185,9 +131,6 @@ def recipe_item_view(request, recipe_id):
     context = {
         'recipe': recipe,
     }
-    user = request.user
-    if user.is_authenticated:
-        context = extend_context(context, user)
     return render(request, 'recipes/singlePage.html', context)
 
 
@@ -233,19 +176,13 @@ def recipe_delete(request, recipe_id):
     return redirect('index_view')
 
 
-
-
-
 @method_decorator(login_required, name='dispatch')
 class FollowersView(View):
     def get(self, request):
         """Страница мои подписки."""
 
-        try:
-            subscriptions = Subscription.objects.filter(
-                user=request.user).order_by('pk')
-        except ObjectDoesNotExist:
-            subscriptions = []
+        subscriptions = Subscription.objects.filter(
+            user=request.user).order_by('pk')
         page_num = request.GET.get('page')
         paginator = Paginator(subscriptions, RECIPES_ON_PAGE)
         page = paginator.get_page(page_num)
@@ -254,13 +191,7 @@ class FollowersView(View):
             'paginator': paginator,
             'page': page,
         }
-        user = request.user
-        if user.is_authenticated:
-            context = extend_context(context, user)
         return render(request, 'recipes/myFollow.html', context)
-
-
-
 
 
 @method_decorator(login_required, name='dispatch')
@@ -278,8 +209,6 @@ class SubscriptionDelete(View):
         return JsonResponse(data)
 
 
-
-
 @method_decorator(login_required, name='dispatch')
 class FavoriteView(View):
     """Класс для страницы избранное"""
@@ -293,13 +222,10 @@ class FavoriteView(View):
         paginator = Paginator(recipes, RECIPES_ON_PAGE)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
-        context = {'username': request.user.username,
-                   'title': 'Избранное',
+        context = {'title': 'Избранное',
                    'page': page,
                    'paginator': paginator
                    }
-        user = request.user
-        context = extend_context(context, user)
         return render(request, 'recipes/indexAuth.html', context)
 
     def post(self, request):
@@ -309,16 +235,13 @@ class FavoriteView(View):
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
         data = {'success': 'true'}
-        favorite = Favorite.favorite.get_user(request.user)
+        favorite, created = Favorite.favorite.get_or_create(user=request.user)
         is_favorite = favorite.recipes.filter(id=recipe_id).exists()
         if is_favorite:
             data['success'] = 'false'
         else:
             favorite.recipes.add(recipe)
         return JsonResponse(data)
-
-
-
 
 
 @method_decorator(login_required, name='dispatch')
@@ -338,8 +261,6 @@ class FavoriteDelete(View):
         return JsonResponse(data)
 
 
-
-
 @method_decorator(login_required, name='dispatch')
 class PurchaseView(View):
     def get(self, request):
@@ -350,9 +271,6 @@ class PurchaseView(View):
             'recipes': recipes,
             'active': 'purchase'
         }
-        user = request.user
-        if user.is_authenticated:
-            context = extend_context(context, user)
         return render(request, 'recipes/shopList.html', context)
 
     def post(self, request):
@@ -361,17 +279,14 @@ class PurchaseView(View):
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        purchase = Purchase.purchase.get_user_purchase(user=request.user)
+        purchase, created = Purchase.purchase.get_or_create(user=request.user)
         data = {'success': 'true'}
-        if not purchase.recipes.filter(id=recipe_id).exists():
-            purchase.recipes.add(recipe)
+        if created:
+            data['success'] = 'false'
             return JsonResponse(data)
-        data['success'] = 'false'
+
+        purchase.recipes.add(recipe)
         return JsonResponse(data)
-
-
-
-
 
 @method_decorator(login_required, name='dispatch')
 class PurchaseDelete(View):
@@ -388,9 +303,6 @@ class PurchaseDelete(View):
             data['success'] = 'false'
         purchase.recipes.remove(recipe)
         return JsonResponse(data)
-
-
-
 
 
 @method_decorator(login_required, name='dispatch')

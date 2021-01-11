@@ -50,7 +50,7 @@ class Recipe(models.Model):
                               verbose_name='Изображение блюда')
     tags = models.ManyToManyField(Tag, verbose_name='Теги', blank=True)
     ingredients = models.ManyToManyField(
-        Product, through='Ingredient', related_name='recipe_ingredients')
+        Product, through='Ingredient', related_name='recipe_ingredients', blank=True)
     cook_time = models.PositiveIntegerField(verbose_name='Время приготовления')
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Время публикации', db_index=True)
@@ -96,19 +96,19 @@ class PurchaseManager(models.Manager):
         except ObjectDoesNotExist:
             return []
 
-    def get_user_purchase(self, user):
-        """
-        Фукция возвращает все подписки пользователя QuerySet экземпляров класса
-        Purchase для пользователя. Если подписок нет создает экземпляр класса
-        Purchase для пользователя и возвращает его.
-        """
-
-        try:
-            return super().get_queryset().get(user=user)
-        except ObjectDoesNotExist:
-            purchase = Purchase(user=user)
-            purchase.save()
-            return purchase
+    # def get_user_purchase(self, user):
+    #     """
+    #     Фукция возвращает все подписки пользователя QuerySet экземпляров класса
+    #     Purchase для пользователя. Если подписок нет создает экземпляр класса
+    #     Purchase для пользователя и возвращает его.
+    #     """
+    #
+    #     try:
+    #         return super().get_queryset().get(user=user)
+    #     except ObjectDoesNotExist:
+    #         purchase = Purchase(user=user)
+    #         purchase.save()
+    #         return purchase
 
 
 class Purchase(models.Model):
@@ -156,19 +156,19 @@ class FavoriteManager(models.Manager):
             return []
 
 
-    def get_user(self, user):
-        """
-        Фукция возвращает все подписки пользователя QuerySet экземпляров класса
-        Favorite для пользователя. Если ибранных нет создает экземпляр класса
-        Favorite для пользователя и возвращает его.
-        """
-
-        try:
-            return super().get_queryset().get(user=user)
-        except ObjectDoesNotExist:
-            favorite_user = Favorite(user=user)
-            favorite_user.save()
-            return favorite_user
+    # def get_user(self, user):
+    #     """
+    #     Фукция возвращает все подписки пользователя QuerySet экземпляров класса
+    #     Favorite для пользователя. Если ибранных нет создает экземпляр класса
+    #     Favorite для пользователя и возвращает его.
+    #     """
+    #
+    #     try:
+    #         return super().get_queryset().get(user=user)
+    #     except ObjectDoesNotExist:
+    #         favorite_user = Favorite(user=user)
+    #         favorite_user.save()
+    #         return favorite_user
 
 
 class Favorite(models.Model):

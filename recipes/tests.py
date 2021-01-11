@@ -1,6 +1,6 @@
 import csv
 
-# import factory
+import factory
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -22,30 +22,23 @@ def _create_recipe(author, name, tag):
     return recipe
 
 
-# TODO Factoty boy
-# def _create_recipe(author, name, tag):
-#     recipe =
-#     pass
+class UserFactory(factory.Factory):
+    """
+    Описываем класс для создания пользователей через библиотеку Factory Boy
+    """
 
-# class UserFactory(factory.Factory):
-#     class Meta:
-#         model = User
-#
-#     username = 'Test user'
-#     email = 'test@test.test'
-#     password = '12345six'
-#     first_name = 'Test user first_name'
-#     admin = False
+    class Meta:
+        model = User
+
+    username = 'Test user'
+    email = 'test@test.test'
+    password = '12345six'
+    first_name = 'Test user first_name'
 
 
-def _create_user(username='Test user', email='test@test.test',
-                 password='12345six', first_name='Test user first_name'):
-    # user = UserFactory.create()
-    user = User.objects.create(
-        username=username,
-        email=email,
-        password=password,
-        first_name=first_name)
+def _create_user(**kwargs):
+    user = UserFactory.create(**kwargs)
+    user.save()
     return user
 
 
@@ -123,7 +116,6 @@ class TestTagFilter(TestCase):
                 _create_recipe(self.user, f'recipe {i}', tag1)
 
     def test_filter(self):
-        print(10)
         urls = [
             f'{reverse("index_view")}?tag=lunch',
             f'{reverse("index_view")}?tag=lunch&page=2',
@@ -235,7 +227,6 @@ class TestRecipePage(TestCase):
             ['подписки', 'light-blue button_size_auto" name="subscribe"'],
             ['покупок', 'button_style_blue" name="purchases"']
         ]
-        print(10)
         for button, element in elements:
             self.assertNotIn(element, response.content.decode(),
                              msg=(
@@ -244,7 +235,8 @@ class TestRecipePage(TestCase):
 
     def test_auth_user(self):
         self.client.force_login(self.user)
-        # Запрос за страницу своего рецепта
+        """Запрос за страницу своего рецепта"""
+
         response1 = self.client.get(
             reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
@@ -268,7 +260,9 @@ class TestRecipePage(TestCase):
             'Редактировать рецепт', response1.content.decode(),
             msg='На странице своего рецепта должна быть кнопка редактировать'),
         elements.append(['подписка на автора', subscibe_btn])
-        # Запрос на страницу чужого рецепта
+
+        """Запрос на страницу чужого рецепта"""
+
         response2 = self.client.get(
             reverse('recipe_view', args=[self.recipe2.id]))
         self.assertEqual(

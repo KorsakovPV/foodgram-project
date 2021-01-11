@@ -16,10 +16,12 @@ urlpatterns = [
     path('shoplist', views.SendShopList.as_view(), name='shoplist'),
     path('ingredients/', views.GetIngredients.as_view(), name='ingredients'),
     path('new/', views.new_recipe_view, name='recipe_new_view'),
-    path('recipes/<int:recipe_id>', views.recipe_item_view,
-         name='recipe_view'),
+
     path('recipes/<int:recipe_id>/edit', views.recipe_edit_view,
          name='recipe_edit_view'),
-    path('recipes/<int:recipe_id>/delete', views.recipe_delete,
-         name='recipe_delete'),
+    # path('recipes/<int:recipe_id>/delete', views.recipe_delete,
+    #      name='recipe_delete'),
+    path('recipes/<int:recipe_id>', views.recipe_item_view,
+         name='recipe_view'),
+
 ]
