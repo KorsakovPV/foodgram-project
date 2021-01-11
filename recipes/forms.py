@@ -15,7 +15,9 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields = ('name', 'tags', 'cook_time', 'ingredients', 'description', 'image',)
+        fields = (
+            'name', 'tags', 'cook_time', 'ingredients', 'description',
+            'image',)
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form__input'}),
             'cook_time': forms.NumberInput(
@@ -28,13 +30,15 @@ class RecipeForm(forms.ModelForm):
             'image': 'Загрузить фото'
         }
 
-
     def clean_ingredients(self):
+        """Валидатор для ингридиентов"""
+
         ingredient_names = self.data.getlist('nameIngredient')
         ingredient_units = self.data.getlist('unitsIngredient')
         ingredient_amounts = self.data.getlist('valueIngredient')
         ingredients_clean = []
-        for ingredient in zip(ingredient_names, ingredient_units, ingredient_amounts):
+        for ingredient in zip(ingredient_names, ingredient_units,
+                              ingredient_amounts):
             if Product.objects.filter(title=ingredient[0]).exists():
                 ingredients_clean.append({'title': ingredient[0],
                                           'unit': ingredient[1],
@@ -48,7 +52,6 @@ class RecipeForm(forms.ModelForm):
         if len(data) == 0:
             raise forms.ValidationError('Добавте название рецепта')
         return data
-
 
     def clean_description(self):
         data = self.cleaned_data['description']

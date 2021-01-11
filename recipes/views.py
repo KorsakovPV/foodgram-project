@@ -7,14 +7,9 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.http import (
-    require_GET,
-    require_http_methods
-)
-from django.views.generic import CreateView
+from django.views.decorators.http import require_http_methods
 
 from foodgram.settings import RECIPES_ON_PAGE
 from recipes.forms import RecipeForm
@@ -51,7 +46,8 @@ def get_ingredients_from_form(ingredients, recipe):
     ingredients_for_save = []
     for ingredient in ingredients:
         product = Product.objects.get(title=ingredient['title'])
-        ingredients_for_save.append(Ingredient(recipe=recipe, ingredient=product,
+        ingredients_for_save.append(
+            Ingredient(recipe=recipe, ingredient=product,
                        amount=ingredient['amount']))
     return ingredients_for_save
 
@@ -68,15 +64,14 @@ def new_recipe_view(request):
         ingredients = form.cleaned_data['ingredients']
         form.cleaned_data['ingredients'] = []
         form.save()
-        Ingredient.objects.bulk_create(get_ingredients_from_form(ingredients, recipe))
+        Ingredient.objects.bulk_create(
+            get_ingredients_from_form(ingredients, recipe))
         return redirect('index_view')
     context = {'page_title': 'Создание рецепта',
                'button': 'Создать рецепт',
                'form': form,
                }
     return render(request, 'recipes/formRecipe.html', context)
-
-
 
 
 @method_decorator(login_required, name='dispatch')
@@ -117,7 +112,7 @@ class ProfileView(View):
         return render(request, 'recipes/profile.html', context)
 
 
-@require_GET
+@require_http_methods(["GET"])
 def recipe_item_view(request, recipe_id):
     """Страница с одним рецепттом."""
 
@@ -144,9 +139,11 @@ def recipe_edit_view(request, recipe_id):
             # recipe.recipe_amount.all().delete()
             recipe = form.save(commit=False)
             recipe.author = request.user
+            ingredients = form.cleaned_data['ingredients']
+            form.cleaned_data['ingredients'] = []
             form.save()
-            ingredients = get_ingredients_from_form(request, recipe)
-            Ingredient.objects.bulk_create(ingredients)
+            Ingredient.objects.bulk_create(
+                get_ingredients_from_form(ingredients, recipe))
             return redirect('recipe_view', recipe_id=recipe_id)
 
     form = RecipeForm(instance=recipe)
@@ -161,7 +158,7 @@ def recipe_edit_view(request, recipe_id):
 
 
 @login_required(login_url='login')
-@require_GET
+@require_http_methods(["GET"])
 def recipe_delete(request, recipe_id):
     """Удаление рецепта."""
 
@@ -275,12 +272,13 @@ class PurchaseView(View):
         recipe = get_object_or_404(Recipe, id=recipe_id)
         purchase, created = Purchase.purchase.get_or_create(user=request.user)
         data = {'success': 'true'}
-        if created:
+        if not created:
             data['success'] = 'false'
             return JsonResponse(data)
 
         purchase.recipes.add(recipe)
         return JsonResponse(data)
+
 
 @method_decorator(login_required, name='dispatch')
 class PurchaseDelete(View):
