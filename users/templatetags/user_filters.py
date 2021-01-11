@@ -1,6 +1,7 @@
 from django import template
+from django.db.models import Sum
 
-from recipes.models import Favorite, Purchase, Tag
+from recipes.models import Favorite, Ingredient, Purchase, Tag
 from users.models import Subscription
 
 register = template.Library()
@@ -85,3 +86,13 @@ def all_tags(value):
     """Возвращает все теги."""
 
     return Tag.objects.all()
+
+
+@register.filter
+def ingredient_count(user):
+    """Возвращает колличество наименований продуктов в списке покупок."""
+
+    return Ingredient.objects.select_related(
+        'ingredient').filter(recipe__purchase__user=user).values(
+        'ingredient__title', 'ingredient__unit').annotate(
+        total=Sum('amount')).count()

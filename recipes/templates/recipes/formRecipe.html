@@ -51,17 +51,20 @@
                         <input type="number" id="cantidad" class="form__input" min="0">
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                     </div>
-                    <div class="form__field-group-ingredientes-container">
+{#                    <div class="form__field-group-ingredientes-container">#}
                         {% for ingredient in recipe.recipe_amount.all %}
-                            <div id="ing_{{ forloop.counter }}" class="form__field-item-ingredient">
+                            <div id="ing{{ forloop.counter }}" class="form__field-item-ingredient">
                                 <span> {{ ingredient.ingredient.title }} {{ ingredient.amount }} {{ ingredient.ingredient.unit }}</span>
                                 <span class="form__field-item-delete"></span>
-                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.title }}">
-                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.amount }}">
-                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.unit }}">
+{#                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.title }}">#}
+{#                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.amount }}">#}
+{#                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.unit }}">#}
+                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient" type="hidden" value="{{ ingredient.ingredient.title }}">
+                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient" type="hidden" value="{{ ingredient.amount }}">
+                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient" type="hidden" value="{{ ingredient.ingredient.unit }}">
                             </div>
                         {% endfor %}
-                    </div>
+{#                    </div>#}
 
                     <div class="form__field-group">
                         <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
@@ -82,10 +85,10 @@
             <div class="form__group">
                 <label for="id_description" class="form__label">Описание</label>
                 <div class="form__field-group">
-                    {% if form.description.initial == 'None' %}#}
-                        <textarea name="description" id="id_description" rows="8" class="form__textarea"></textarea>
-                    {% else %}
+                    {% if page_title == 'Редактирование рецепта' %}
                         <textarea name="description" id="id_description" rows="8" class="form__textarea">{{ form.description.initial }}</textarea>
+                    {% else %}
+                        <textarea name="description" id="id_description" rows="8" class="form__textarea"></textarea>
                     {% endif %}
                     <span class="form__error">{{ form.description.errors }}</span>
                 </div>
@@ -100,8 +103,8 @@
             </div>
             <div class="form__footer">
                 <button type="submit" class="button button_style_blue">{{ button }}</button>
-                {% if form.name.value %}
-                    <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe.id%}" class="form__ingredient-link">Удалить</a>
+                {% if recipe.id %}
+                    <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe_id=recipe.id %}" class="form__ingredient-link">Удалить</a>
                 {% endif %}
             </div>
         </form>

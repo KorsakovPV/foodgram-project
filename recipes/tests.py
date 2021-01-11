@@ -3,6 +3,8 @@ import csv
 from django.test import Client, TestCase
 from django.urls import reverse
 
+import factory
+
 from users.models import Subscription
 
 from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
@@ -22,6 +24,26 @@ def _create_recipe(author, name, tag):
     return recipe
 
 
+class UserFactory(factory.Factory):
+    """
+    Описываем класс для создания пользователей через библиотеку Factory Boy
+    """
+
+    class Meta:
+        model = User
+
+    username = 'Test user'
+    email = 'test@test.test'
+    password = '12345six'
+    first_name = 'Test user first_name'
+
+
+def _create_user(**kwargs):
+    user = UserFactory.create(**kwargs)
+    user.save()
+    return user
+
+
 class TestPageHeader(TestCase):
     """
     Тесты для шапки страницы.
@@ -35,10 +57,7 @@ class TestPageHeader(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six')
+        self.user = _create_user()
 
     def test_not_auth_user(self):
         response = self.client.get(reverse('index_view'))
@@ -49,7 +68,8 @@ class TestPageHeader(TestCase):
         self.assertIn(
             html, response.content.decode(),
             msg='У неавторизованного юзера в шапке должен быть пункт Войти')
-        html = f'<a href="{reverse("recipe_new_view")}" class="nav__link link">Создать рецепт'
+        html = f'<a href="{reverse("recipe_new_view")}"' \
+               f' class="nav__link link">Создать рецепт'
         self.assertNotIn(
             html, response.content.decode(),
             msg=('У неавторизованного юзера в шапке не должно быть'
@@ -66,7 +86,8 @@ class TestPageHeader(TestCase):
         self.assertIn(
             html, response.content.decode(),
             msg='У залогиненного юзера в шапке должен быть пункт смены пароля')
-        html = f'<a href="{reverse("recipe_new_view")}" class="nav__link link">Создать рецепт'
+        html = f'<a href="{reverse("recipe_new_view")}"' \
+               f' class="nav__link link">Создать рецепт'
         self.assertIn(
             html, response.content.decode(),
             msg=('У залогиненного юзера в шапке должен быть пункт'
@@ -87,10 +108,7 @@ class TestTagFilter(TestCase):
 
     def setUp(self):
         self.clent = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six')
+        self.user = _create_user()
         self.client.force_login(self.user)
         tag1 = Tag.objects.create(name='завтрак', slug='breakfast',
                                   colors='orange')
@@ -102,7 +120,6 @@ class TestTagFilter(TestCase):
                 _create_recipe(self.user, f'recipe {i}', tag1)
 
     def test_filter(self):
-        print(10)
         urls = [
             f'{reverse("index_view")}?tag=lunch',
             f'{reverse("index_view")}?tag=lunch&page=2',
@@ -139,16 +156,11 @@ class TestProfile(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
 
     def test_not_auth_user(self):
         response = self.client.get(
@@ -198,16 +210,11 @@ class TestRecipePage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Test recipe', tag)
         self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
@@ -224,16 +231,17 @@ class TestRecipePage(TestCase):
             ['подписки', 'light-blue button_size_auto" name="subscribe"'],
             ['покупок', 'button_style_blue" name="purchases"']
         ]
-        print(10)
         for button, element in elements:
-            self.assertNotIn(element, response.content.decode(),
-                             msg=(
-                                 f'Кнопка {button} не должна быть на странице для '
-                                 'неавторизованного пользователя'))
+            self.assertNotIn(
+                element,
+                response.content.decode(),
+                msg=(f'Кнопка {button} не должна быть на странице для '
+                     'неавторизованного пользователя'))
 
     def test_auth_user(self):
         self.client.force_login(self.user)
-        # Запрос за страницу своего рецепта
+        """Запрос за страницу своего рецепта"""
+
         response1 = self.client.get(
             reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
@@ -257,7 +265,9 @@ class TestRecipePage(TestCase):
             'Редактировать рецепт', response1.content.decode(),
             msg='На странице своего рецепта должна быть кнопка редактировать'),
         elements.append(['подписка на автора', subscibe_btn])
-        # Запрос на страницу чужого рецепта
+
+        """Запрос на страницу чужого рецепта"""
+
         response2 = self.client.get(
             reverse('recipe_view', args=[self.recipe2.id]))
         self.assertEqual(
@@ -286,11 +296,7 @@ class TestFavoritePage(TestCase):
 
     def setUp(self):
         self.clent = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)
         _create_recipe(self.user, 'Unfavorite recipe', tag)
@@ -301,9 +307,12 @@ class TestFavoritePage(TestCase):
     def test_not_auth_user(self):
         response = self.client.get(reverse('favorite_view'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("favorite_view")}'
-        self.assertRedirects(response, redirect_url,
-                             msg_prefix='GET-запрос на страницу избранного для неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+        self.assertRedirects(
+            response,
+            redirect_url,
+            msg_prefix='GET-запрос на страницу избранного для '
+                       'неавторизованного юзера должно перенаправлять на '
+                       'страницу входа')
 
     def test_auth_user(self):
         self.client.force_login(self.user)
@@ -332,16 +341,11 @@ class TestSubscriptionPage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Test recipe', tag)
         Subscription.objects.create(user=self.user2, author=self.user)
@@ -349,9 +353,11 @@ class TestSubscriptionPage(TestCase):
     def test_not_auth_user(self):
         response = self.client.get(reverse('subscriptions'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("subscriptions")}'
-        self.assertRedirects(response, redirect_url,
-                             msg_prefix='GET-запрос на страницу подписок неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+        self.assertRedirects(
+            response,
+            redirect_url,
+            msg_prefix='GET-запрос на страницу подписок неавторизованного'
+                       ' юзера должно перенаправлять на страницу входа')
 
     def test_auth_user(self):
         self.client.force_login(self.user2)
@@ -376,11 +382,7 @@ class TestPurchasePage(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         purchase = Purchase(user=self.user)
@@ -390,9 +392,12 @@ class TestPurchasePage(TestCase):
     def test_not_auth_user(self):
         response = self.client.get(reverse('purchases_view'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("purchases_view")}'
-        self.assertRedirects(response, redirect_url,
-                             msg_prefix='GET-запрос на страницу покупок должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+        self.assertRedirects(
+            response,
+            redirect_url,
+            msg_prefix='GET-запрос на страницу покупок должен '
+                       'неавторизованного юзера должно перенаправлять на '
+                       'страницу входа')
 
     def test_auth_user(self):
         self.client.force_login(self.user)
@@ -417,11 +422,7 @@ class TestIngredientQuery(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         with open('recipes/fixtures/ingredients.csv') as isfile:
             reader = csv.reader(isfile)
             for row in reader:
@@ -431,10 +432,12 @@ class TestIngredientQuery(TestCase):
     def test_not_auth_user(self):
         response = self.client.get(f'{reverse("ingredients")}?query=хл',
                                    follow=True)
-        redirect_url = f'{reverse("login")}?next={reverse("ingredients")}%3Fquery%3D%25C3%2591%25C2%2585%25C3%2590%25C2%25BB'
+        redirect_url = f'{reverse("login")}?next={reverse("ingredients")}' \
+                       f'%3Fquery%3D%25C3%2591%25C2%2585%25C3%2590%25C2%25BB'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='GET-запрос ингредиента должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='GET-запрос ингредиента должен '
+                                        'неавторизованного юзера должно '
+                                        'перенаправлять на страницу входа')
 
     def test_auth_user(self):
         self.client.force_login(self.user)
@@ -470,11 +473,7 @@ class TestFavoriteButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
@@ -485,16 +484,19 @@ class TestFavoriteButton(TestCase):
             content_type='application/json', follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("favorite_view")}'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='Запрос на добавление в избранное должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='Запрос на добавление в избранное '
+                                        'должен неавторизованного юзера должно'
+                                        ' перенаправлять на страницу входа')
 
         response = self.client.delete(
             reverse('favorite_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
-        redirect_url = f'{reverse("login")}?next={reverse("favorite_delete", args=[self.recipe.id])}'
+        redirect_url = f'{reverse("login")}?next=' \
+                       f'{reverse("favorite_delete", args=[self.recipe.id])}'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='Запрос на удаление из избранного должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='Запрос на удаление из избранного '
+                                        'должен неавторизованного юзера должно'
+                                        ' перенаправлять на страницу входа')
 
     def test_auth_user_add(self):
         self.client.force_login(self.user)
@@ -561,16 +563,11 @@ class TestSubscriptionButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Test user',
-            email='test@test.test',
-            password='12345six',
-            first_name='Test user first_name')
-        self.user2 = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34',
-            first_name='Another test user first_name')
+        self.user = _create_user()
+        self.user2 = _create_user(username='Another test user',
+                                  email='another@test.test',
+                                  password='onetwo34',
+                                  first_name='Another test user first_name')
         self.data = {'id': f'{self.user2.id}'}
 
     def test_not_auth_user(self):
@@ -579,16 +576,19 @@ class TestSubscriptionButton(TestCase):
             content_type='application/json', follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("subscriptions")}'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='Запрос на добавление в подписки должно неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='Запрос на добавление в подписки '
+                                        'должно неавторизованного юзера должно'
+                                        ' перенаправлять на страницу входа')
 
         response = self.client.delete(
             reverse('subscription_delete', args=[self.user2.id]),
             content_type='application/json', follow=True)
-        redirect_url = f'{reverse("login")}?next={reverse("subscription_delete", args=[self.user2.id])}'
+        redirect_url = f'{reverse("login")}?next=' \
+                       f'{reverse("subscription_delete", args=[self.user2.id])}'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='Запрос на удаление из подписки должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='Запрос на удаление из подписки должен'
+                                        ' неавторизованного юзера должно '
+                                        'перенаправлять на страницу входа')
 
     def test_auth_user_add(self):
         self.client.force_login(self.user)
@@ -655,10 +655,7 @@ class TestPurchaseButton(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            username='Another test user',
-            email='another@test.test',
-            password='onetwo34')
+        self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
@@ -669,17 +666,20 @@ class TestPurchaseButton(TestCase):
             content_type='application/json', follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("purchases_view")}'
         self.assertRedirects(response, redirect_url,
-                             msg_prefix='Запрос на добавление в покупки должен неавторизованного'
-                                        ' юзера должно перенаправлять на страницу входа')
+                             msg_prefix='Запрос на добавление в покупки должен'
+                                        ' неавторизованного юзера должно '
+                                        'перенаправлять на страницу входа')
 
         response = self.client.delete(
             reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
-        redirect_url = f'{reverse("login")}?next={reverse("purchase_delete", args=[self.recipe.id])}'
+        redirect_url = f'{reverse("login")}?next=' \
+                       f'{reverse("purchase_delete", args=[self.recipe.id])}'
         self.assertRedirects(response, redirect_url,
                              msg_prefix=(
-                                 'Запросе на удаление из покупок должен неавторизованного'
-                                 ' юзера направлять на страницу входа'))
+                                 'Запросе на удаление из покупок должен '
+                                 'неавторизованного юзера направлять на '
+                                 'страницу входа'))
 
     def test_auth_user_add(self):
         self.client.force_login(self.user)
@@ -693,8 +693,7 @@ class TestPurchaseButton(TestCase):
                       msg='Словарь должен содержать ключ "success"')
         self.assertEqual(data_incoming['success'], 'true',
                          msg='При добавлении в покупки значение ключа = true')
-        self.assertTrue(Purchase.purchase.get(
-            user=self.user).recipes.filter(id=self.recipe.id).exists(),
+        self.assertTrue(Purchase.purchase.filter(user=self.user).exists(),
                         msg='Должна создаваться соответствующая запись в бд')
         repeat_response = self.client.post(
             reverse('purchases_view'), data=self.data,
