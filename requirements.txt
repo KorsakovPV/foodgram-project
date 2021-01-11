@@ -17,5 +17,5 @@ Pygments==2.7.2
 pytz==2020.4
 sorl-thumbnail==12.7.0
 sqlparse==0.4.1
-traitlets==5.0.5
+traitlets
 wcwidth==0.2.5
