@@ -51,9 +51,9 @@
                         <input type="number" id="cantidad" class="form__input" min="0">
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                     </div>
-                    <div class="form__field-group-ingredientes-container">
+{#                    <div class="form__field-group-ingredientes-container">#}
                         {% for ingredient in recipe.recipe_amount.all %}
-                            <div id="ing_{{ forloop.counter }}" class="form__field-item-ingredient">
+                            <div id="ing{{ forloop.counter }}" class="form__field-item-ingredient">
                                 <span> {{ ingredient.ingredient.title }} {{ ingredient.amount }} {{ ingredient.ingredient.unit }}</span>
                                 <span class="form__field-item-delete"></span>
                                 <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.title }}">
@@ -61,7 +61,7 @@
                                 <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.unit }}">
                             </div>
                         {% endfor %}
-                    </div>
+{#                    </div>#}
 
                     <div class="form__field-group">
                         <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
@@ -101,7 +101,7 @@
             <div class="form__footer">
                 <button type="submit" class="button button_style_blue">{{ button }}</button>
                 {% if recipe.id %}
-                    <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe.id %}" class="form__ingredient-link">Удалить</a>
+                    <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe_id=recipe.id %}" class="form__ingredient-link">Удалить</a>
                 {% endif %}
             </div>
         </form>

@@ -15,7 +15,7 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields = ('name', 'tags', 'cook_time', 'ingredients', 'description', 'image',)#, 'ingredients'
+        fields = ('name', 'tags', 'cook_time', 'ingredients', 'description', 'image',)
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form__input'}),
             'cook_time': forms.NumberInput(
@@ -28,47 +28,30 @@ class RecipeForm(forms.ModelForm):
             'image': 'Загрузить фото'
         }
 
-    # def __init__(self, request, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.request = request
 
-    # def clean_ingredients(self):
-    #     data = self.cleaned_data['ingredients']
-    #     ingedient_names = self.request.getlist('nameIngredient')
-    #     if len(ingedient_names) == 0:
-    #         raise forms.ValidationError('Добавте ингридиент')
-    #     for ingedient in ingedient_names:
-    #         if not Product.objects.filter(title=ingedient).exists():
-    #             raise forms.ValidationError(f'Ингредиент {ingedient} не корректный.')
-    #     return data
+    def clean_ingredients(self):
+        ingredient_names = self.data.getlist('nameIngredient')
+        ingredient_units = self.data.getlist('unitsIngredient')
+        ingredient_amounts = self.data.getlist('valueIngredient')
+        ingredients_clean = []
+        for ingredient in zip(ingredient_names, ingredient_units, ingredient_amounts):
+            if Product.objects.filter(title=ingredient[0]).exists():
+                ingredients_clean.append({'title': ingredient[0],
+                                          'unit': ingredient[1],
+                                          'amount': ingredient[2]})
+        if len(ingredients_clean) == 0:
+            raise forms.ValidationError('Добавте ингридиент')
+        return ingredients_clean
 
     def clean_name(self):
         data = self.cleaned_data['name']
         if len(data) == 0:
-            raise forms.ValidationError("Name!")
-    #
-    #     # Always return a value to use as the new cleaned data, even if
-    #     # this method didn't change it.
+            raise forms.ValidationError('Добавте название рецепта')
         return data
 
-    def clean_cook_time(self):
-        data = self.cleaned_data['cook_time']
-        if len(data) == '':
-            raise forms.ValidationError("cook_time!")
-    #
-    #     # Always return a value to use as the new cleaned data, even if
-    #     # this method didn't change it.
-        return data
 
     def clean_description(self):
         data = self.cleaned_data['description']
         if len(data) == 0:
-            raise forms.ValidationError("description!")
-    #
-    #     # Always return a value to use as the new cleaned data, even if
-    #     # this method didn't change it.
+            raise forms.ValidationError('Добавте описание рецепта')
         return data
-
-    def clean(self):
-        # общая функция валидации
-        return self.cleaned_data

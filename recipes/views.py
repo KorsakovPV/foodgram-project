@@ -45,22 +45,15 @@ class IndexView(View):
         return render(request, 'recipes/indexAuth.html', context)
 
 
-def get_ingredients_from_form(request, recipe):
+def get_ingredients_from_form(ingredients, recipe):
     """Получает ингридиенты рецепта из формы и возвращает их списком."""
 
-    ingedient_names = request.POST.getlist('nameIngredient')
-    ingredient_units = request.POST.getlist('unitsIngredient')
-    amounts = request.POST.getlist('valueIngredient')
-    products = []
-    for i in range(len(ingedient_names)):
-        products.append(Product.objects.get(title=ingedient_names[i],
-                                            unit=ingredient_units[i]))
-    ingredients = []
-    for i in range(len(amounts)):
-        ingredients.append(
-            Ingredient(recipe=recipe, ingredient=products[i],
-                       amount=amounts[i]))
-    return ingredients
+    ingredients_for_save = []
+    for ingredient in ingredients:
+        product = Product.objects.get(title=ingredient['title'])
+        ingredients_for_save.append(Ingredient(recipe=recipe, ingredient=product,
+                       amount=ingredient['amount']))
+    return ingredients_for_save
 
 
 @login_required(login_url='login')
@@ -72,9 +65,10 @@ def new_recipe_view(request):
     if form.is_valid():
         recipe = form.save(commit=False)
         recipe.author = request.user
+        ingredients = form.cleaned_data['ingredients']
+        form.cleaned_data['ingredients'] = []
         form.save()
-        ingredients = get_ingredients_from_form(request, recipe)
-        Ingredient.objects.bulk_create(ingredients)
+        Ingredient.objects.bulk_create(get_ingredients_from_form(ingredients, recipe))
         return redirect('index_view')
     context = {'page_title': 'Создание рецепта',
                'button': 'Создать рецепт',
@@ -146,8 +140,8 @@ def recipe_edit_view(request, recipe_id):
         form = RecipeForm(request.POST or None, files=request.FILES or None,
                           instance=recipe)
         if form.is_valid():
-            recipe.ingredients.remove()
-            recipe.recipe_amount.all().delete()
+            # recipe.ingredients.remove()
+            # recipe.recipe_amount.all().delete()
             recipe = form.save(commit=False)
             recipe.author = request.user
             form.save()
