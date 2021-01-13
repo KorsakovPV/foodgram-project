@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from foodgram.settings import RECIPES_ON_PAGE
 from recipes.forms import RecipeForm
 from recipes.models import Favorite, Ingredient, Product, Purchase, Recipe
+from recipes.utils import get_ingredients_from_form
 from users.models import Subscription, User
 
 
@@ -38,18 +39,6 @@ class IndexView(View):
                    'purchase': Purchase.purchase,
                    }
         return render(request, 'recipes/indexAuth.html', context)
-
-
-def get_ingredients_from_form(ingredients, recipe):
-    """Получает ингридиенты рецепта из формы и возвращает их списком."""
-
-    ingredients_for_save = []
-    for ingredient in ingredients:
-        product = Product.objects.get(title=ingredient['title'])
-        ingredients_for_save.append(
-            Ingredient(recipe=recipe, ingredient=product,
-                       amount=ingredient['amount']))
-    return ingredients_for_save
 
 
 @login_required(login_url='login')
@@ -135,8 +124,8 @@ def recipe_edit_view(request, recipe_id):
         form = RecipeForm(request.POST or None, files=request.FILES or None,
                           instance=recipe)
         if form.is_valid():
-            # recipe.ingredients.remove()
-            # recipe.recipe_amount.all().delete()
+            recipe.ingredients.remove()
+            recipe.recipe_amount.all().delete()
             recipe = form.save(commit=False)
             recipe.author = request.user
             ingredients = form.cleaned_data['ingredients']
@@ -191,12 +180,13 @@ class SubscriptionDelete(View):
         """Отписка от подписки на автора."""
 
         author = get_object_or_404(User, id=author_id)
-        data = {'success': 'true'}
-        follow = Subscription.objects.filter(
-            user=request.user, author=author)
-        if not follow:
-            data['success'] = 'false'
-        follow.delete()
+        follow = Subscription.objects.filter(user=request.user,
+                                             author=author)
+        quantity, obj_subscription = follow.delete()
+        if quantity == 0:
+            data = {'success': False}
+        else:
+            data = {'success': True}
         return JsonResponse(data)
 
 
@@ -225,11 +215,11 @@ class FavoriteView(View):
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        data = {'success': 'true'}
+        data = {'success': True}
         favorite, created = Favorite.favorite.get_or_create(user=request.user)
         is_favorite = favorite.recipes.filter(id=recipe_id).exists()
         if is_favorite:
-            data['success'] = 'false'
+            data['success'] = False
         else:
             favorite.recipes.add(recipe)
         return JsonResponse(data)
@@ -241,14 +231,12 @@ class FavoriteDelete(View):
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        data = {'success': 'true'}
-        try:
-            favorite = Favorite.favorite.get(user=request.user)
-        except ObjectDoesNotExist:
-            data['success'] = 'false'
-        if not favorite.recipes.filter(id=recipe_id).exists():
-            data['success'] = 'false'
-        favorite.recipes.remove(recipe)
+        favorite = Favorite.favorite.filter(user=request.user, recipes=recipe)
+        quantity, obj_favorite = favorite.delete()
+        if quantity == 0:
+            data = {'success': False}
+        else:
+            data = {'success': True}
         return JsonResponse(data)
 
 
@@ -271,9 +259,9 @@ class PurchaseView(View):
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
         purchase, created = Purchase.purchase.get_or_create(user=request.user)
-        data = {'success': 'true'}
+        data = {'success': True}
         if not created:
-            data['success'] = 'false'
+            data['success'] = False
             return JsonResponse(data)
 
         purchase.recipes.add(recipe)
@@ -286,14 +274,12 @@ class PurchaseDelete(View):
         """Удаление рецепта из списка покупок."""
 
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        data = {'success': 'true'}
-        try:
-            purchase = Purchase.purchase.get(user=request.user)
-        except ObjectDoesNotExist:
-            data['success'] = 'false'
-        if not purchase.recipes.filter(id=recipe_id).exists():
-            data['success'] = 'false'
-        purchase.recipes.remove(recipe)
+        purchase = Purchase.purchase.filter(user=request.user, recipes=recipe)
+        quantity, obj_purchase = purchase.delete()
+        if quantity == 0:
+            data = {'success': False}
+        else:
+            data = {'success': True}
         return JsonResponse(data)
 
 
@@ -330,9 +316,9 @@ class Subscriptions(View):
         author = get_object_or_404(User, id=json_data['id'])
         is_exist = Subscription.objects.filter(
             user=request.user, author=author).exists()
-        data = {'success': 'true'}
+        data = {'success': True}
         if is_exist:
-            data['success'] = 'false'
+            data['success'] = False
         else:
             Subscription.objects.create(user=request.user, author=author)
         return JsonResponse(data)

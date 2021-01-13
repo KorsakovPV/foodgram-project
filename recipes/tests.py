@@ -508,8 +508,8 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При добавлении в избранное success = true')
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При добавлении в избранное success = True')
         self.assertTrue(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
                         msg='Должна создаваться соответствующая запись в бд')
@@ -518,8 +518,8 @@ class TestFavoriteButton(TestCase):
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно добавить в избранное success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно добавить в избранное success = False')
         self.assertEqual(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).count(), 1,
                          msg='Не должна создаваться повторная запись в бд')
@@ -537,18 +537,19 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При удалении из избранного success = true')
-        self.assertFalse(Favorite.favorite.get(
-            user=self.user).recipes.filter(id=self.recipe.id).exists(),
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При удалении из избранного success = True')
+        self.assertFalse(Favorite.favorite.filter(recipes=self.recipe,
+                                                  user=self.user)
+                         .exists(),
                          msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
             reverse('favorite_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно удалить из избранного success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно удалить из избранного success = False')
 
 
 class TestSubscriptionButton(TestCase):
@@ -600,8 +601,8 @@ class TestSubscriptionButton(TestCase):
                               msg='Проверьте, что на запрос приходит словарь')
         self.assertIn('success', data_incoming,
                       msg='Проверьте, что словарь содержит ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При добавлении в подписки значение ключа = true')
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При добавлении в подписки значение ключа = True')
         self.assertTrue(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
                         msg='Должна создаваться соответствующая запись в бд')
@@ -610,8 +611,8 @@ class TestSubscriptionButton(TestCase):
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно добавить в подписки success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно добавить в подписки success = False')
         self.assertEqual(Subscription.objects.filter(
             user=self.user, author=self.user2).count(), 1,
                          msg='Не должна создаваться повторная запись в бд')
@@ -629,8 +630,8 @@ class TestSubscriptionButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При удалении из подписок значение ключа = true')
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При удалении из подписок значение ключа = True')
         self.assertFalse(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
                          msg='Должна удаляться соответствующая запись в бд')
@@ -639,8 +640,8 @@ class TestSubscriptionButton(TestCase):
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно удалить из подписок success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно удалить из подписок success = False')
 
 
 class TestPurchaseButton(TestCase):
@@ -691,8 +692,8 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При добавлении в покупки значение ключа = true')
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При добавлении в покупки значение ключа = True')
         self.assertTrue(Purchase.purchase.filter(user=self.user).exists(),
                         msg='Должна создаваться соответствующая запись в бд')
         repeat_response = self.client.post(
@@ -700,8 +701,8 @@ class TestPurchaseButton(TestCase):
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно добавить в покупки success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно добавить в покупки success = False')
         self.assertEqual(
             Purchase.purchase.get(user=self.user)
                 .recipes.filter(id=self.recipe.id).count(), 1,
@@ -719,16 +720,16 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
-                         msg='При удалении из покупок значение ключа = true')
-        self.assertFalse(
-            Purchase.purchase.get(user=self.user)
-                .recipes.filter(id=self.recipe.id).exists(),
+        self.assertEqual(data_incoming['success'], True,
+                         msg='При удалении из покупок значение ключа = True')
+        self.assertFalse(Purchase.purchase.filter(recipes=self.recipe,
+                                                  user=self.user)
+                         .exists(),
             msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
             reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)
         data_incoming_2 = repeat_del_response.json()
         self.assertEqual(
-            data_incoming_2['success'], 'false',
-            msg='При попытке повторно удалить из покупок success = false')
+            data_incoming_2['success'], False,
+            msg='При попытке повторно удалить из покупок success = False')
