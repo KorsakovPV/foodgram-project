@@ -10,9 +10,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """
-        Функция при первом развертывании добавляет в дазу ингредиенты и теги
+        Функция при первом развертывании добавляет в базу ингредиенты и теги
         python manage.py load_product_data
         """
+
         with open('recipes/fixtures/ingredients.csv') as isfile:
             reader = csv.reader(isfile)
             for row in reader:
