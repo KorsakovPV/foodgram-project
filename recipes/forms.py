@@ -48,12 +48,16 @@ class RecipeForm(forms.ModelForm):
         return ingredients_clean
 
     def clean_name(self):
+        """Валидатор для названия рецептов"""
+
         data = self.cleaned_data['name']
         if len(data) == 0:
             raise forms.ValidationError('Добавте название рецепта')
         return data
 
     def clean_description(self):
+        """Валидатор для описания рецептов рецептов"""
+
         data = self.cleaned_data['description']
         if len(data) == 0:
             raise forms.ValidationError('Добавте описание рецепта')

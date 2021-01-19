@@ -107,7 +107,7 @@ class TestTagFilter(TestCase):
     """
 
     def setUp(self):
-        self.clent = Client()
+        self.client = Client()
         self.user = _create_user()
         self.client.force_login(self.user)
         tag1 = Tag.objects.create(name='завтрак', slug='breakfast',
@@ -295,7 +295,7 @@ class TestFavoritePage(TestCase):
     """
 
     def setUp(self):
-        self.clent = Client()
+        self.client = Client()
         self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
         self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)

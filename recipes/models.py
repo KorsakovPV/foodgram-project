@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import User
@@ -63,6 +64,7 @@ class Recipe(models.Model):
                                          blank=True)
 
     cook_time = models.PositiveIntegerField(verbose_name='Время приготовления',
+                                            validators=[MinValueValidator(1)],
                                             blank=True)
 
     pub_date = models.DateTimeField(auto_now_add=True,
