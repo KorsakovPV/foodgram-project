@@ -38,12 +38,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = False  # переключаем в True для локальной разработки.
+DEBUG = False
 
 if not DEBUG:
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1',
-                     '84.201.176.31', 'da-eda.ga', 'www.da-eda.ga']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '178.154.255.100']
 
     DATABASES = {
         'default': {
