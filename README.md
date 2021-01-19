@@ -11,6 +11,18 @@ Foodgram - онлайн-сервис, где пользователи смогу
 
 1.  Склонируйте проект
 
+        docker-compose up --build
+
+        docker-compose exec web bash
+
+        python manage.py migrate
+
+        python manage.py createsuperuser
+
+        python manage.py load_product_data
+
+
+
 2.  Выполните миграции
 
         ./manage.py migrate
