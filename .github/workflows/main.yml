@@ -99,7 +99,7 @@ jobs:
             cd ~
             cd ./code
             sudo docker pull korsakovpv/foodgram_project:latest
-            sudo docker-compose up --force-recreate -d web
+            sudo docker-compose up -d
 
   send_message:
     runs-on: ubuntu-latest
@@ -110,4 +110,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ github.workflow }} Развернут.
+          message: ${{ github.workflow }} Развернут на http://178.154.255.100/.
