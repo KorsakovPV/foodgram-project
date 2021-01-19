@@ -98,7 +98,6 @@ jobs:
           script: |
             cd ~
             cd ./code
-            sudo docker rmi korsakovpv/foodgram_project -f
             sudo docker pull korsakovpv/foodgram_project:latest
             sudo docker-compose up --force-recreate -d web
 
