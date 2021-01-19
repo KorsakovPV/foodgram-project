@@ -21,8 +21,8 @@ services:
     container_name: foodgram
     restart: always
     volumes:
-      - ./static_volume:/code/static/
-      - ./media_volume:/code/media/
+      - ./static:/code/static/
+      - ./media:/code/media/
     depends_on:
       - db
     env_file:
