@@ -21,7 +21,7 @@ Foodgram - онлайн-сервис, где пользователи смогу
 
         python manage.py load_product_data
 
-
+        python manage.py collectstatic
 
 2.  Выполните миграции
 
