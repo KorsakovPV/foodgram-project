@@ -58,7 +58,6 @@ if not DEBUG:
 
 else:
     SECRET_KEY = '&=-4pb%_b5=7j#6%_6rv-6v!#02$c)&a26)m^&9hhnn1axf%z&'
-    # SECRET_KEY = '#r()u!_z3de!1m&angd1^918*y04-os7ehqv!isqe1nw*q#+*^'
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
     DATABASES = {
         'default': {
