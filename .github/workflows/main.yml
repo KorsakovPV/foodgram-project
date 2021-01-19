@@ -55,6 +55,16 @@ jobs:
           push: true
           tags: korsakovpv/foodgram_project:latest
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+            python-version: 3.8
+
       - name: Install dump-env and create .env
         env:
           SECRET_DB_ENGINE: ${{ secrets.DB_ENGINE }}
@@ -65,10 +75,11 @@ jobs:
           SECRET_DB_PORT: ${{ secrets.DB_PORT }}
           SECRET_SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          export PATH="${PATH}:/home/runner/.local/bin"
+#          export PATH="${PATH}:/home/runner/.local/bin"
           python -m pip install --upgrade pip
           pip install dump-env==1.2.0
           dump-env --template=.env.template --prefix='SECRET_' > .env
+
       - name: Copy file via ssh password
         uses: appleboy/scp-action@master
         with:
