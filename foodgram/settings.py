@@ -7,7 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
 
 if not DEBUG:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    # SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = '&=-4pb%_b5=7j#6%_6rv-6v!#02$c)&a26)m^&9hhnn1axf%z&'
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '178.154.255.100']
 
     DATABASES = {
