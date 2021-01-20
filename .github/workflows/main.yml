@@ -29,9 +29,9 @@ jobs:
     - name: Lint with flake8
       run: flake8 . --config=setup.cfg
 
-    - name: Test with UnitTest
-      run:
-        python manage.py test
+#    - name: Test with UnitTest
+#      run:
+#        python manage.py test
 
 
   build_and_push_to_docker_hub:
@@ -80,6 +80,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install dump-env==1.2.0
           dump-env --template=.env.template --prefix='SECRET_' > .env
+          python manage.py test
+
 
       - name: Copy file via ssh password
         uses: appleboy/scp-action@master
