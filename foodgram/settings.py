@@ -4,7 +4,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = False
+DEBUG = True
 
 if not DEBUG:
     SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -12,7 +12,7 @@ if not DEBUG:
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': os.environ.get('DB_ENGINE'),
             'NAME': os.environ.get('DB_NAME'),
             'USER': os.environ.get('POSTGRES_USER'),
             'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
