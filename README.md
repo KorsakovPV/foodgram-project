@@ -1,4 +1,4 @@
-![foodgram-project](https://github.com/KorsakovPV/foodgram-project/workflows/foodgram-project/badge.svg)
+![foodgram-project](https://github.com/KorsakovPV/foodgram-project/workflows/foodgram/badge.svg)
 
 # **Foodgram-project**
 
