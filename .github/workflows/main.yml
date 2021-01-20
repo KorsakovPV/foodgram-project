@@ -39,7 +39,9 @@ jobs:
         SECRET_DB_PORT: ${{ secrets.DB_PORT }}
         SECRET_SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run:
-        python manage.py test
+        python -m pip install --upgrade pip
+        pip install dump-env==1.2.0
+        dump-env --template=.env.template --prefix='SECRET_' > .env
 
 
   build_and_push_to_docker_hub:
