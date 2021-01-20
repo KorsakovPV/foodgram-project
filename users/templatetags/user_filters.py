@@ -90,9 +90,6 @@ def all_tags(value):
 
 @register.filter
 def ingredient_count(user):
-    """Возвращает колличество наименований продуктов в списке покупок."""
+    """Возвращает колличество рецептов в списке покупок."""
 
-    return Ingredient.objects.select_related(
-        'ingredient').filter(recipe__purchase__user=user).values(
-        'ingredient__title', 'ingredient__unit').annotate(
-        total=Sum('amount')).count()
+    return Purchase.purchase.get_queryset().get(user=user).recipes.count()

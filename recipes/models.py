@@ -112,6 +112,14 @@ class PurchaseManager(models.Manager):
         except ObjectDoesNotExist:
             return []
 
+    def get_user_purchase(self, user):
+        try:
+            return super().get_queryset().get(user=user)
+        except ObjectDoesNotExist:
+            purchase = Purchase(user=user)
+            purchase.save()
+            return purchase
+
 
 class Purchase(models.Model):
     """Модель для хранения рецептов выбранных для покупок."""
