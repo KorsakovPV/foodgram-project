@@ -258,7 +258,7 @@ class PurchaseView(View):
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        purchase, created = Purchase.purchase.get_or_create(user=request.user)
+        purchase, created = Purchase.purchase.get_or_create(user=request.user, id=recipe.id)
         data = {'success': True}
         if not created:
             data['success'] = False
