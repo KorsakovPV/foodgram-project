@@ -268,7 +268,6 @@ class PurchaseView(View):
         return JsonResponse(data)
 
 
-
 @method_decorator(login_required, name='dispatch')
 class PurchaseDelete(View):
     def delete(self, request, recipe_id):
