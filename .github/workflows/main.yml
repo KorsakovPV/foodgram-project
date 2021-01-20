@@ -63,7 +63,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-            python-version: ${{ matrix.python-version }}
+            python-version: 3.8
 
       - name: Install dump-env and create .env
         env:
