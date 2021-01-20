@@ -101,6 +101,12 @@ class Ingredient(models.Model):
 class PurchaseManager(models.Manager):
     """Менеджер модели список покупок."""
 
+    def counter(self, user):
+        try:
+            return super().get_queryset().get(user=user).recipes.count()
+        except ObjectDoesNotExist:
+            return 0
+
     def get_purchases_list(self, user):
         """
         Фукция возвращает QuerySet рецептов списка покупок. Если таких рецепров

@@ -91,4 +91,4 @@ def all_tags(value):
 def ingredient_count(user):
     """Возвращает колличество рецептов в списке покупок."""
 
-    return Purchase.purchase.filter(user=user).count()
+    return Purchase.purchase.counter(user)
