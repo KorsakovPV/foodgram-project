@@ -11,6 +11,7 @@ from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 SECRET_KEY = '&=-4pb%_b5=7j#6%_6rv-6v!#02$c)&a26)m^&9hhnn1axf%z&'
 
+
 def _create_recipe(author, name, tag):
     products = [Product.objects.create(
         title=f'testIng{i}', unit=i) for i in range(2)]
