@@ -257,15 +257,16 @@ class PurchaseView(View):
         json_data = json.loads(request.body.decode())
         recipe_id = json_data['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        purchase = Purchase.purchase.get_user_purchase(user=request.user)
-        data = {
-            'success': 'true'
-        }
-        if not purchase.recipes.filter(id=recipe_id).exists():
+        purchase, created = Purchase.purchase.get_or_create(user=request.user)
+        data = {'success': True}
+        if not Purchase.purchase.filter(recipes=recipe,
+                                        user=request.user).exists():
             purchase.recipes.add(recipe)
             return JsonResponse(data)
-        data['success'] = 'false'
+
+        data['success'] = False
         return JsonResponse(data)
+
 
 
 @method_decorator(login_required, name='dispatch')
