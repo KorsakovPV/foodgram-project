@@ -705,7 +705,7 @@ class TestPurchaseButton(TestCase):
             msg='При попытке повторно добавить в покупки success = False')
         self.assertEqual(
             Purchase.purchase.get(user=self.user)
-                .recipes.filter(id=self.recipe.id).count(), 1,
+                    .recipes.filter(id=self.recipe.id).count(), 1,
             msg='Не должна создаваться повторная запись в бд')
 
     def test_auth_user_delete(self):
@@ -725,7 +725,7 @@ class TestPurchaseButton(TestCase):
         self.assertFalse(Purchase.purchase.filter(recipes=self.recipe,
                                                   user=self.user)
                          .exists(),
-            msg='Должна удаляться соответствующая запись в бд')
+                         msg='Должна удаляться соответствующая запись в бд')
         repeat_del_response = self.client.delete(
             reverse('purchase_delete', args=[self.recipe.id]),
             content_type='application/json', follow=True)

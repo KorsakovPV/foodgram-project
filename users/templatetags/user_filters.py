@@ -1,7 +1,6 @@
 from django import template
-from django.db.models import Sum
 
-from recipes.models import Favorite, Ingredient, Purchase, Tag
+from recipes.models import Favorite, Purchase, Tag
 from users.models import Subscription
 
 register = template.Library()
