@@ -21,12 +21,14 @@ class IndexView(View):
     """Главная страница сайта."""
 
     def get_queryset(self, request):
+        """Запрос для главной страницы"""
+
         tags = request.GET.getlist('tag')
         recipes = Recipe.recipes.tag_filter(tags)
         return recipes
 
     def get(self, request):
-        """Для главная страница сайта доступен только метод GET."""
+        """Для главнай страница сайта доступен только метод GET."""
 
         recipes = self.get_queryset(request)
         paginator = Paginator(recipes, RECIPES_ON_PAGE)
@@ -81,6 +83,8 @@ class ProfileView(View):
     """Станица с рецептами одного автора."""
 
     def get_queryset(self, request):
+        """Запрос для страницы автора"""
+
         tags = request.GET.getlist('tag')
         recipes = Recipe.recipes.tag_filter(tags)
         return recipes

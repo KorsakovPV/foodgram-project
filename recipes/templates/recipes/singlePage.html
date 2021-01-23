@@ -35,7 +35,9 @@
                     <p class="single-card__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                     {% if request.user.is_authenticated %}
                         <ul class="single-card__items">
-                            <li class="single-card__item"><p class="single-card__text"><span class="icon-user"></span>{{ recipe.author }}</p></li>
+                            <a href="{% url 'profile_view' user_id=recipe.author.id %}" class="link" target="_blank">
+                                <li class="single-card__item"><p class="single-card__text"><span class="icon-user"></span>{{ recipe.author }}</p></li>
+                            </a>
                             {% if request.user == recipe.author %}
                                 <li class="single-card__item">  <a style="margin-left: 2.5em" href="{% url 'recipe_edit_view' recipe_id=recipe.id %}" class="single-card__text">Редактировать рецепт</a></li>
                             {% endif %}

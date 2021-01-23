@@ -23,10 +23,10 @@
         {% if request.user.is_authenticated and request.user != author %}
             <div class="author-subscribe" data-author="{{ author.id }}">
                 <p style="padding: 0 0 2em 0;">
-                    {% if recipe.author|is_subscribe:request.user %}
-                        <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline button_style_blue" name="subscribe">Отписаться от автора</button>
+                    {% if author|is_subscribe:request.user %}
+                        <button class="button button_style_light-blue" name="subscribe">Отписаться от автора</button>
                     {% else %}
-                        <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline" name="subscribe" data-out="true">Подписаться на автора</button>
+                        <button class="button button_style_blue" name="subscribe" data-out="true">Подписаться на автора</button>
                     {% endif %}
                 </p>
             </div>

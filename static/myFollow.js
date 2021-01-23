@@ -6,7 +6,7 @@ const configButton = {
     subscribe: {
         attr: 'data-out',
         default: {
-            class: 'button_style_blue',
+            class: 'button_style_light-blue',
             text: 'Отписаться'
         },
         active: {

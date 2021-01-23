@@ -39,12 +39,13 @@ class RecipeForm(forms.ModelForm):
         ingredients_clean = []
         for ingredient in zip(ingredient_names, ingredient_units,
                               ingredient_amounts):
-            if Product.objects.filter(title=ingredient[0]).exists():
+            if Product.objects.filter(title=ingredient[0]).exists() and \
+                    int(ingredient[2]) > 0:
                 ingredients_clean.append({'title': ingredient[0],
                                           'unit': ingredient[1],
                                           'amount': ingredient[2]})
         if len(ingredients_clean) == 0:
-            raise forms.ValidationError('Добавте ингридиент')
+            raise forms.ValidationError('Добавте ингридиент Ж)')
         return ingredients_clean
 
     def clean_name(self):
@@ -61,4 +62,12 @@ class RecipeForm(forms.ModelForm):
         data = self.cleaned_data['description']
         if len(data) == 0:
             raise forms.ValidationError('Добавте описание рецепта')
+        return data
+
+    def clean_tags(self):
+        """Валидатор для описания рецептов рецептов"""
+
+        data = self.cleaned_data['tags']
+        if len(data) == 0:
+            raise forms.ValidationError('Добавте тег')
         return data

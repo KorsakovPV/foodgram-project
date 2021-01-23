@@ -10,7 +10,7 @@
         {% endthumbnail %}
     </a>
     <div class="card__body">
-        <a class="card__title link" href="{% url 'recipe_view' recipe_id=recipe.id %}" target="_blank"> {{ recipe.name }}</a>
+        <a class="card__title link" href="{% url 'recipe_view' recipe_id=recipe.id %}" target="_blank">{{ recipe.name }}</a>
         <ul class="card__items">
             {% for tag in recipe.tags.all %}
                 <li class="card__item"><span class="badge badge_style_{{ tag|add_color }}">{{ tag.name }}</span></li>
@@ -26,7 +26,7 @@
             {% if recipe|is_purchase:request.user %}
                 <button class="button button_style_light-blue" name="purchases" ><span class="icon-check button__icon"></span>Рецепт добавлен</button>
             {% else %}
-                <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-plus  button__icon"></span>Добавить в покупки</button>
+                <button class="button button_style_blue" name="purchases" data-out><span class="icon-plus  button__icon"></span>Добавить в покупки</button>
             {% endif %}
 
             {% include "recipes/favorite_star.html" with recipe=recipe %}

@@ -1,7 +1,9 @@
 {% load thumbnail user_filters %}
 <div class="card-user" data-author="{{ author.author.id }}">
     <div class="card-user__header">
-        <h2 class="card-user__title">{{ author.author.first_name }}</h2>
+        <a href="{% url 'profile_view' user_id=author.author.id %}" class="link" target="_blank">
+            <h2 class="card-user__title">{{ author.author.first_name }}</h2>
+        </a>
     </div>
     <div class="card-user__body">
         <ul class="card-user__items">
@@ -9,11 +11,12 @@
                 {% if forloop.counter < 4 %}
                     <li class="card-user__item">
                         <div class="recipe">
-                            {% thumbnail recipe.image "72x72" crop="center" upscale=True as im %}
-                            <img src="{{ im.url }}" alt="{{ recipe.name }}" class="recipe__image">
-                            {% endthumbnail %}
-                            <h3 class="recipe__title">
-                                {{ recipe.name }}</h3>
+                            <a href="{% url 'recipe_view' recipe_id=recipe.id %}" class="link" target="_blank">
+                                {% thumbnail recipe.image "72x72" crop="center" upscale=True as im %}
+                                    <img src="{{ im.url }}" alt="{{ recipe.name }}" class="recipe__image">
+                                {% endthumbnail %}
+                            </a>
+                                <h3 class="recipe__title">{{ recipe.name }}</h3>
                             <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                         </div>
                     </li>
