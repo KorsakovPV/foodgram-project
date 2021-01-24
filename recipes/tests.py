@@ -706,7 +706,7 @@ class TestPurchaseButton(TestCase):
             id=self.recipe.id).count(), 1,
                          msg='Не должна создаваться повторная запись в бд')
 
-    def test_auth_user_delete(self):  # Fail
+    def test_auth_user_delete(self):
         self.client.force_login(self.user)
         self.client.post(reverse('purchases_view'), data=self.data,
                          content_type='application/json', follow=True)
