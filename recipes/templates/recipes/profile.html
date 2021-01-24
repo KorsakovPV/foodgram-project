@@ -19,20 +19,13 @@
             </h1>
             {% include 'recipes/tags.html' %}
         </div>
-
         {% if request.user.is_authenticated and request.user != author %}
             <div class="author-subscribe" data-author="{{ author.id }}">
                 <p style="padding: 0 0 2em 0;">
-                    {% if author|is_subscribe:request.user %}
-                        <button class="button button_style_light-blue" name="subscribe">Отписаться от автора</button>
-                    {% else %}
-                        <button class="button button_style_blue" name="subscribe" data-out="true">Подписаться на автора</button>
-                    {% endif %}
+                    {% include 'recipes/subscribe_button.html' with author=author user=request.user %}
                 </p>
             </div>
         {% endif %}
-
-
         <div class="card-list">
             {% for recipe in page %}
                 {% include "recipes/recipe_item.html" with recipe=recipe %}

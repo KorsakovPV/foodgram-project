@@ -249,22 +249,22 @@ class TestRecipePage(TestCase):
             msg=('Страница отдельного рецепта должна быть доступна'
                  ' авторизованному юзеру'))
         elements = [
-            ['избранное', 'button_style_none" name="favorites"'],
-            ['список покупок', 'button_style_blue" name="purchases"']
+            ['избранное', 'name="favorites"'],
+            ['список покупок', 'name="purchases"']
         ]
         for button, element in elements:
             self.assertIn(
                 element, response1.content.decode(),
                 msg=(f'Кнопка {button} должна быть на странице для'
                      ' залогиненного юзера'))
-        subscibe_btn = 'light-blue button_size_auto" name="subscribe"'
+        subscibe_btn = 'name="subscribe"'
         self.assertNotIn(
             subscibe_btn, response1.content.decode(),
             msg='На странице своего рецепта не должна быть кнопка подписки')
         self.assertIn(
             'Редактировать рецепт', response1.content.decode(),
             msg='На странице своего рецепта должна быть кнопка редактировать'),
-        elements.append(['подписка на автора', subscibe_btn])
+        elements.append(['подписка на автора', 'name="subscribe"'])
 
         """Запрос на страницу чужого рецепта"""
 
@@ -274,10 +274,9 @@ class TestRecipePage(TestCase):
             response2.status_code, 200,
             msg='Страница чужого рецепта доступна авторизованному юзеру')
         for button, element in elements:
-            self.assertIn(
-                element, response2.content.decode(),
-                msg=(f'Кнопка {button} должна быть на странице для'
-                     ' залогиненного юзера'))
+            self.assertIn(element, response2.content.decode(), msg=(
+                f'Кнопка {button} должна быть на '
+                f'странице для залогиненного юзера'))
         self.assertNotIn(
             'Редактировать рецепт', response2.content.decode(),
             msg=('Кнопка редактирования не должна быть на странице'
@@ -705,10 +704,10 @@ class TestPurchaseButton(TestCase):
             msg='При попытке повторно добавить в покупки success = False')
         self.assertEqual(
             Purchase.purchase.get(user=self.user)
-                    .recipes.filter(id=self.recipe.id).count(), 1,
+                .recipes.filter(id=self.recipe.id).count(), 1,
             msg='Не должна создаваться повторная запись в бд')
 
-    def test_auth_user_delete(self):
+    def test_auth_user_delete(self):  # Fail
         self.client.force_login(self.user)
         self.client.post(reverse('purchases_view'), data=self.data,
                          content_type='application/json', follow=True)

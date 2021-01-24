@@ -2,6 +2,7 @@ import json
 from urllib.parse import unquote
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
@@ -278,12 +279,14 @@ class PurchaseDelete(View):
         """Удаление рецепта из списка покупок."""
 
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        purchase = Purchase.purchase.filter(user=request.user, recipes=recipe)
-        quantity, obj_purchase = purchase.delete()
-        if quantity == 0:
-            data = {'success': False}
-        else:
-            data = {'success': True}
+        data = {'success': True}
+        try:
+            purchase = Purchase.purchase.get(user=request.user)
+        except ObjectDoesNotExist:
+            data['success'] = False
+        if not purchase.recipes.filter(id=recipe_id).exists():
+            data['success'] = False
+        purchase.recipes.remove(recipe)
         return JsonResponse(data)
 
 
