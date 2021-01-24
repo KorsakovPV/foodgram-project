@@ -48,10 +48,10 @@
                 </div>
                 <ul class="single-card__items">
                 {% if request.user.is_authenticated %}
-                    {% include "recipes/purchases_button.html" with recipe=recipe user=request.user%}
+                    <li class="single-card__item">{% include "recipes/purchases_button_single.html" with recipe=recipe user=request.user%}</li>
                 {% endif %}
                 {% if request.user.is_authenticated and request.user != recipe.author %}
-                    {% include 'recipes/subscribe_button.html' with author=recipe.author user=request.user %}
+                    <li class="single-card__item">{% include 'recipes/subscribe_button.html' with author=recipe.author user=request.user %}</li>
                 {% endif %}
                 </ul>
                 <div class="single-card__section">
