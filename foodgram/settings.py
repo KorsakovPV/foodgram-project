@@ -4,7 +4,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = True
+if str(BASE_DIR) == '/home/pavel/Dev/foodgram-project':
+    DEBUG = True
+else:
+    DEBUG = False
 
 if not DEBUG:
     SECRET_KEY = os.environ.get('SECRET_KEY')
