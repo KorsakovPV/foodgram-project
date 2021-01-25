@@ -24,7 +24,7 @@
     <div class="card__footer">
         {% if request.user.is_authenticated %}
 
-            {% include "recipes/purchases_button_index.html" with recipe=recipe user=request.user %}
+            {% include "recipes/button_purchases_index.html" with recipe=recipe user=request.user %}
             {% include "recipes/favorite_button_star.html" with recipe=recipe %}
         {% endif %}
     </div>

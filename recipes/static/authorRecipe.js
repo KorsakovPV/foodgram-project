@@ -29,11 +29,11 @@ const configButton = {
     subscribe: {
         attr: 'data-out',
         default: {
-            class: 'button_style_blue',
+            class: 'button_style_light-blue',
             text: 'Подписаться на автора'
         },
         active: {
-            class: 'button_style_light-blue',
+            class: 'button_style_light-blue-outline',
             text: `Отписаться от автора`
         }
     }
