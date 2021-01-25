@@ -12,6 +12,7 @@ class RecipeForm(forms.ModelForm):
         to_field_name='slug',
         required=False
     )
+    description = forms.CharField(required=True)
 
     class Meta:
         model = Recipe
@@ -30,6 +31,7 @@ class RecipeForm(forms.ModelForm):
             'image': 'Загрузить фото'
         }
 
+
     def clean_ingredients(self):
         """Валидатор для ингридиентов"""
 
@@ -39,13 +41,18 @@ class RecipeForm(forms.ModelForm):
         ingredients_clean = []
         for ingredient in zip(ingredient_names, ingredient_units,
                               ingredient_amounts):
-            if Product.objects.filter(title=ingredient[0]).exists() and \
-                    int(ingredient[2]) > 0:
+            if not int(ingredient[2]) > 0:
+                raise forms.ValidationError('Количество ингредиентов должно '
+                                            'быть положительным и не нулевым')
+            elif not Product.objects.filter(title=ingredient[0]).exists():
+                raise forms.ValidationError(
+                    'Ингредиенты должны быть из списка')
+            else:
                 ingredients_clean.append({'title': ingredient[0],
                                           'unit': ingredient[1],
                                           'amount': ingredient[2]})
         if len(ingredients_clean) == 0:
-            raise forms.ValidationError('Добавте ингридиент Ж)')
+            raise forms.ValidationError('Добавте ингридиент')
         return ingredients_clean
 
     def clean_name(self):

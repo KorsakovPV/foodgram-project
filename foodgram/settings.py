@@ -148,5 +148,5 @@ RECIPES_ON_PAGE = 6
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-VERSION = '1.02'
+VERSION = '1.03'
 

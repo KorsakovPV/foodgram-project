@@ -56,7 +56,7 @@ class Recipe(models.Model):
                               verbose_name='Изображение блюда')
 
     tags = models.ManyToManyField(Tag, verbose_name='Теги',
-                                  )
+                                  blank=True)
 
     ingredients = models.ManyToManyField(Product,
                                          through='Ingredient',

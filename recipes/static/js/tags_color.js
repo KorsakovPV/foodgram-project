@@ -1,7 +1,14 @@
-breakfast_tag = document.querySelector(".tags__checkbox[value='breakfast']");
-lunch_tag = document.querySelector(".tags__checkbox[value='lunch']");
-dinner_tag = document.querySelector(".tags__checkbox[value='dinner']");
+function checkboxCheck(tags){
+    for(var i=0; i<tags.length; i++) {
+        if (tags[i].checked) return true
+    }
+    alert("Добавте тег")
+    return false;
+}
 
-breakfast_tag.classList.add('tags__checkbox_style_orange');
-lunch_tag.classList.add('tags__checkbox_style_green');
-dinner_tag.classList.add('tags__checkbox_style_purple');
+
+function ingredientCheck(nameIngredient){
+    if (0<nameIngredient.length) return true
+    alert("Добавте ингридиент")
+    return false;
+}
