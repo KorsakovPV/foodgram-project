@@ -1,5 +1,7 @@
 from django import template
 
+from foodgram.settings import VERSION
+
 from recipes.models import Favorite, Purchase, Tag
 from users.models import Subscription
 
@@ -92,3 +94,8 @@ def ingredient_count(user):
     """Возвращает колличество рецептов в списке покупок."""
 
     return Purchase.purchase.counter(user)
+
+
+@register.filter
+def version(value):
+    return VERSION
