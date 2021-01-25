@@ -6,12 +6,12 @@ const configButton = {
     subscribe: {
         attr: 'data-out',
         default: {
-            class: '',
-            text: 'Подписаться на автора+++'
+            class: 'button_style_blue',
+            text: 'Подписаться на автора'
         },
         active: {
-            class: '',
-            text: `Отписаться от автора+++`
+            class: 'button_style_blue',
+            text: `Отписаться от автора`
         }
     }
 }
