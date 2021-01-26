@@ -144,7 +144,7 @@ class TestTagFilter(TestCase):
             msg='Фильтры должны правильно работать на странице с избранным')
 
 
-class TestProfile(TestCase):
+class TestProfilePage(TestCase):
     """
     Тесты для страницы профиля.
 
@@ -398,14 +398,14 @@ class TestPurchasePage(TestCase):
                        'неавторизованного юзера должно перенаправлять на '
                        'страницу входа')
 
-    def test_auth_user(self):
+    def test_auth_user(self): #Fail
         self.client.force_login(self.user)
         response = self.client.get(reverse('purchases_view'), follow=True)
         self.assertEqual(
             response.status_code, 200,
             msg='Страница покупок должна быть доступна авторизованному юзеру')
         self.assertIn(
-            'Test user first_name', response.content.decode(),
+            'Cool recipe', response.content.decode(),
             msg='На странице покупок должен быть добавленный рецепт')
 
 
