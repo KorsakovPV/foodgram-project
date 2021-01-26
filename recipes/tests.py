@@ -398,7 +398,7 @@ class TestPurchasePage(TestCase):
                        'неавторизованного юзера должно перенаправлять на '
                        'страницу входа')
 
-    def test_auth_user(self): #Fail
+    def test_auth_user(self):
         self.client.force_login(self.user)
         response = self.client.get(reverse('purchases_view'), follow=True)
         self.assertEqual(
