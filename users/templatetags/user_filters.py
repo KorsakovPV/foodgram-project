@@ -52,6 +52,7 @@ def renew_tag_link(request, tag):
     """Возвращает строки необходимые для формирования ссылки тегов"""
 
     request_copy = request.GET.copy()
+    request_copy['page'] = '1'
     tags = request_copy.getlist('tag')
     if tag.slug in tags:
         tags.remove(tag.slug)

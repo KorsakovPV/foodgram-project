@@ -11,11 +11,7 @@
     <main class="main container">
         <div class="main__header">
             <h1 class="main__title">
-                {% if author.first_name %}
-                    {{ author.first_name }}
-                {% else %}
-                    {{ author.username }}
-                {% endif %}
+                {% include 'recipes/name.html' with author=author %}
             </h1>
             {% include 'recipes/tags.html' %}
         </div>

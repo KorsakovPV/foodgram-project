@@ -6,11 +6,15 @@ User = get_user_model()
 
 class CreationForm(forms.ModelForm):
     """Форма регистрации нового пользователя"""
+
     password = forms.CharField(
         label='Пароль',
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'})
     )
+
+    first_name = forms.CharField(label='Имя ФИО')
+    username = forms.CharField(label='Имя пользователя Username')
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)

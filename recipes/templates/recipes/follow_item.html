@@ -2,7 +2,7 @@
 <div class="card-user" data-author="{{ author.author.id }}">
     <div class="card-user__header">
         <a href="{% url 'profile_view' user_id=author.author.id %}" class="link" target="_blank">
-            <h2 class="card-user__title">{{ author.author.first_name }}</h2>
+            <h2 class="card-user__title">{% include 'recipes/name.html' with author=author.author %}</h2>
         </a>
     </div>
     <div class="card-user__body">
