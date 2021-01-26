@@ -14,7 +14,7 @@
         <h1 class="main__title">{{ page_title }}</h1>
     </div>
     <div class="form-container">
-        <form name=f1 enctype="multipart/form-data" class="form" action="" method="POST">
+        <form name=form1 enctype="multipart/form-data" class="form" action="" method="POST">
             {% csrf_token %}
 
             <div class="form__group">
@@ -102,7 +102,7 @@
             </div>
 
             <div class="form__footer">
-                <button type="submit" class="button button_style_blue" onclick="checkboxCheck(tags); ingredientCheck(nameIngredient); form.submit();">{{ button }}</button>
+                <input type="submit" onclick="return((checkboxCheck(tags)) && ingredientCheck(nameIngredient));" class="button button_style_blue" value="{{ button }}">
                 {% if recipe.id %}
                     <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe_id=recipe.id %}" class="form__ingredient-link">Удалить</a>
                 {% endif %}
@@ -123,6 +123,6 @@
     <script src="{% static 'js/utils/debouncing.js' %}"></script>
     <script src="{% static 'js/api/Api.js' %}"></script>
     <script src="{% static 'formRecipe.js' %}"></script>
-    <script src="{% static 'js/tags_color.js' %}"></script>
+    <script src="{% static 'js/tags_ingredient_validator.js' %}"></script>
 
 {% endblock %}

@@ -31,7 +31,6 @@ class RecipeForm(forms.ModelForm):
             'image': 'Загрузить фото'
         }
 
-
     def clean_ingredients(self):
         """Валидатор для ингридиентов"""
 
