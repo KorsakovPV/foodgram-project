@@ -7,7 +7,8 @@ import factory
 
 from users.models import Subscription
 
-from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
+from recipes.models import Favorite, \
+    Ingredient, Product, Purchase, Recipe, Tag, User
 
 
 def _create_recipe(author, name, tag):

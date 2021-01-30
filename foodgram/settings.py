@@ -3,11 +3,12 @@ from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+# if str(BASE_DIR) == '/home/pavel/Dev/foodgram-project':
 
-if str(BASE_DIR) == '/home/pavel/Dev/foodgram-project':
-    DEBUG = True
-else:
+if str(BASE_DIR) == '/code':
     DEBUG = False
+else:
+    DEBUG = True
 
 if not DEBUG:
     SECRET_KEY = os.environ.get('SECRET_KEY')
