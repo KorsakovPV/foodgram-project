@@ -1,3 +1,4 @@
+"""Тесты view приложения Recipes."""
 import csv
 
 from django.test import Client, TestCase
@@ -27,10 +28,14 @@ def _create_recipe(author, name, tag):
 
 class UserFactory(factory.Factory):
     """
-    Описываем класс для создания пользователей через библиотеку Factory Boy
+    Класс Factory.
+
+    Класс для создания пользователей через библиотеку Factory Boy.
     """
 
     class Meta:
+        """Модель экземпляры которой создаем."""
+
         model = User
 
     username = 'Test user'
@@ -40,6 +45,7 @@ class UserFactory(factory.Factory):
 
 
 def _create_user(**kwargs):
+    """Создаем пользователя."""
     user = UserFactory.create(**kwargs)
     user.save()
     return user
@@ -57,10 +63,12 @@ class TestPageHeader(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(reverse('index_view'))
         self.assertEqual(
             response.status_code, 200,
@@ -77,6 +85,7 @@ class TestPageHeader(TestCase):
                  ' пункта Создать рецепт'))
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
         response = self.client.get(reverse('index_view'))
         html = f'<a href="{reverse("login")}" class="nav__link link">Войти'
@@ -108,6 +117,7 @@ class TestTagFilter(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         self.client.force_login(self.user)
@@ -121,6 +131,7 @@ class TestTagFilter(TestCase):
                 _create_recipe(self.user, f'recipe {i}', tag1)
 
     def test_filter(self):
+        """Тест фильтров."""
         urls = [
             f'{reverse("index_view")}?tag=lunch',
             f'{reverse("index_view")}?tag=lunch&page=2',
@@ -156,6 +167,7 @@ class TestProfilePage(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         self.user2 = _create_user(username='Another test user',
@@ -164,6 +176,7 @@ class TestProfilePage(TestCase):
                                   first_name='Another test user first_name')
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(
             reverse('profile_view', args=[self.user.id]))
         self.assertEqual(
@@ -176,6 +189,7 @@ class TestProfilePage(TestCase):
                  ' кнопки подписки'))
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
         response = self.client.get(
             reverse('profile_view', args=[self.user.id]))
@@ -210,6 +224,7 @@ class TestRecipePage(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         self.user2 = _create_user(username='Another test user',
@@ -221,6 +236,7 @@ class TestRecipePage(TestCase):
         self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(
             reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
@@ -240,9 +256,8 @@ class TestRecipePage(TestCase):
                      'неавторизованного пользователя'))
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
-        """Запрос за страницу своего рецепта"""
-
         response1 = self.client.get(
             reverse('recipe_view', args=[self.recipe.id]))
         self.assertEqual(
@@ -295,6 +310,7 @@ class TestFavoritePage(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
@@ -305,6 +321,7 @@ class TestFavoritePage(TestCase):
         favorite.recipes.add(Recipe.recipes.get(id=1))
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(reverse('favorite_view'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("favorite_view")}'
         self.assertRedirects(
@@ -315,6 +332,7 @@ class TestFavoritePage(TestCase):
                        'страницу входа')
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
         response = self.client.get(reverse('favorite_view'), follow=True)
         self.assertEqual(
@@ -340,6 +358,7 @@ class TestSubscriptionPage(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         self.user2 = _create_user(username='Another test user',
@@ -351,6 +370,7 @@ class TestSubscriptionPage(TestCase):
         Subscription.objects.create(user=self.user2, author=self.user)
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(reverse('subscriptions'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("subscriptions")}'
         self.assertRedirects(
@@ -360,6 +380,7 @@ class TestSubscriptionPage(TestCase):
                        ' юзера должно перенаправлять на страницу входа')
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user2)
         response = self.client.get(reverse('followers_view'), follow=True)
         self.assertEqual(
@@ -381,6 +402,7 @@ class TestPurchasePage(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
@@ -390,6 +412,7 @@ class TestPurchasePage(TestCase):
         purchase.recipes.add(self.recipe)
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(reverse('purchases_view'), follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("purchases_view")}'
         self.assertRedirects(
@@ -400,6 +423,7 @@ class TestPurchasePage(TestCase):
                        'страницу входа')
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
         response = self.client.get(reverse('purchases_view'), follow=True)
         self.assertEqual(
@@ -421,6 +445,7 @@ class TestIngredientQuery(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         with open('recipes/fixtures/ingredients.csv') as isfile:
@@ -430,6 +455,7 @@ class TestIngredientQuery(TestCase):
                 Product.objects.get_or_create(title=title, unit=unit)
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.get(f'{reverse("ingredients")}?query=хл',
                                    follow=True)
         redirect_url = f'{reverse("login")}?next={reverse("ingredients")}' \
@@ -440,6 +466,7 @@ class TestIngredientQuery(TestCase):
                                         'перенаправлять на страницу входа')
 
     def test_auth_user(self):
+        """Тест авторизированного пользователя."""
         self.client.force_login(self.user)
         query = 'чай'
         response = self.client.get(f'{reverse("ingredients")}?query={query}',
@@ -468,10 +495,11 @@ class TestFavoriteButton(TestCase):
     Для неавторизованного пользователя проверяет, что страница недоступна и
     пользователь перенаправляется на страницу входа.
     Для авторизованного пользователя проверяется, что страница доступна и что
-    добовление и удаление рецепта происходит корректно.
+    добавление и удаление рецепта происходит корректно.
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
@@ -479,6 +507,7 @@ class TestFavoriteButton(TestCase):
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.post(
             reverse('favorite_view'), data=self.data,
             content_type='application/json', follow=True)
@@ -499,6 +528,7 @@ class TestFavoriteButton(TestCase):
                                         ' перенаправлять на страницу входа')
 
     def test_auth_user_add(self):
+        """Тест авторизированного пользователя. Добавление."""
         self.client.force_login(self.user)
         response = self.client.post(
             reverse('favorite_view'), data=self.data,
@@ -525,6 +555,7 @@ class TestFavoriteButton(TestCase):
                          msg='Не должна создаваться повторная запись в бд')
 
     def test_auth_user_delete(self):
+        """Тест авторизированного пользователя. Удаление."""
         self.client.force_login(self.user)
         self.client.post(
             reverse('favorite_view'), data=self.data,
@@ -563,6 +594,7 @@ class TestSubscriptionButton(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         self.user2 = _create_user(username='Another test user',
@@ -572,6 +604,7 @@ class TestSubscriptionButton(TestCase):
         self.data = {'id': f'{self.user2.id}'}
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.post(
             reverse('subscriptions'), data=self.data,
             content_type='application/json', follow=True)
@@ -592,6 +625,7 @@ class TestSubscriptionButton(TestCase):
                                         'перенаправлять на страницу входа')
 
     def test_auth_user_add(self):
+        """Тест авторизированного пользователя. Добавление."""
         self.client.force_login(self.user)
         response = self.client.post(
             reverse('subscriptions'), data=self.data,
@@ -618,6 +652,7 @@ class TestSubscriptionButton(TestCase):
                          msg='Не должна создаваться повторная запись в бд')
 
     def test_auth_user_delete(self):
+        """Тест авторизированного пользователя. Удаление."""
         self.client.force_login(self.user)
         self.client.post(
             reverse('subscriptions'), data=self.data,
@@ -655,6 +690,7 @@ class TestPurchaseButton(TestCase):
     """
 
     def setUp(self):
+        """Подготовка тестового окружения."""
         self.client = Client()
         self.user = _create_user()
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
@@ -662,6 +698,7 @@ class TestPurchaseButton(TestCase):
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):
+        """Тест не авторизированного пользователя."""
         response = self.client.post(
             reverse('purchases_view'), data=self.data,
             content_type='application/json', follow=True)
@@ -683,6 +720,7 @@ class TestPurchaseButton(TestCase):
                                  'страницу входа'))
 
     def test_auth_user_add(self):
+        """Тест авторизированного пользователя. Добавление."""
         self.client.force_login(self.user)
         response = self.client.post(
             reverse('purchases_view'), data=self.data,
@@ -708,6 +746,7 @@ class TestPurchaseButton(TestCase):
                          msg='Не должна создаваться повторная запись в бд')
 
     def test_auth_user_delete(self):
+        """Тест авторизированного пользователя. Удаление."""
         self.client.force_login(self.user)
         self.client.post(reverse('purchases_view'), data=self.data,
                          content_type='application/json', follow=True)

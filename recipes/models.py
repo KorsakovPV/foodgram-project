@@ -1,3 +1,4 @@
+"""Модели приложения Recipes."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -12,6 +13,7 @@ class Product(models.Model):
     unit = models.CharField(max_length=64, verbose_name='Единицы измерения')
 
     def __str__(self):
+        """Переопределяем строковое представление модели Product."""
         return '{title}, {unit}'.format(title=self.title, unit=self.unit)
 
 
@@ -23,6 +25,7 @@ class Tag(models.Model):
     colors = models.SlugField(verbose_name='Цвет тега', default='Black')
 
     def __str__(self):
+        """Переопределяем строковое представление модели Tag."""
         return '{name}'.format(name=self.name)
 
 
@@ -30,6 +33,13 @@ class RecipeManager(models.Manager):
     """Менеджер реализует сортировку по тегам."""
 
     def tag_filter(self, tags):
+        """
+        Метод для работы с тегами.
+
+        Возвращает выборку по тегам. Если теги не указаны то возвращает
+        все рецепты.
+
+        """
         if tags:
             return super().get_queryset().prefetch_related('author',
                                                            'tags').filter(
@@ -40,7 +50,7 @@ class RecipeManager(models.Manager):
 
 
 class Recipe(models.Model):
-    """Модель для хранения рецептов"""
+    """Модель для хранения рецептов."""
 
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                verbose_name='Автор рецепта',
@@ -74,16 +84,22 @@ class Recipe(models.Model):
     recipes = RecipeManager()
 
     class Meta:
+        """Переопределяем сортировку по умолчанию."""
+
         ordering = ('-pub_date',)
 
     def __str__(self):
+        """Переопределяем строковое представление модели Recipe."""
         return '{name}'.format(name=self.name)
 
 
 class Ingredient(models.Model):
     """
+    Модель для хранения ингредиентов.
+
     Модель связывает Recipe и Product. Какие ингредиенты (продукты) и сколько
     их нужно для конкретного рецепта.
+
     """
 
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
@@ -92,9 +108,16 @@ class Ingredient(models.Model):
     amount = models.PositiveIntegerField(verbose_name='Количество ингредиента')
 
     class Meta:
+        """
+        Класс мета.
+
+        Наборы имен полей, которые, взятые вместе, должны быть уникальными.
+        """
+
         unique_together = ('ingredient', 'amount', 'recipe')
 
     def __str__(self):
+        """Переопределяем строковое представление модели Recipe."""
         return '{amount}'.format(amount=self.amount)
 
 
@@ -102,6 +125,7 @@ class PurchaseManager(models.Manager):
     """Менеджер модели список покупок."""
 
     def counter(self, user):
+        """Счетчик считает сколько рецептов в покупках."""
         try:
             return super().get_queryset().get(user=user).recipes.count()
         except ObjectDoesNotExist:
@@ -109,22 +133,16 @@ class PurchaseManager(models.Manager):
 
     def get_purchases_list(self, user):
         """
-        Фукция возвращает QuerySet рецептов списка покупок. Если таких рецепров
-        нет возвращает пустой лист.
-        """
+        Список покупок.
 
+        Функция возвращает QuerySet рецептов списка покупок. Если таких
+        рецептов нет возвращает пустой лист.
+
+        """
         try:
             return super().get_queryset().get(user=user).recipes.all()
         except ObjectDoesNotExist:
             return []
-
-    def get_user_purchase(self, user):
-        try:
-            return super().get_queryset().get(user=user)
-        except ObjectDoesNotExist:
-            purchase = Purchase(user=user)
-            purchase.save()
-            return purchase
 
 
 class Purchase(models.Model):
@@ -139,23 +157,13 @@ class Purchase(models.Model):
 class FavoriteManager(models.Manager):
     """Менеджер модели избранное."""
 
-    def get_favorites(self, user):
-        """
-        Фукция возвращает QuerySet рецептов добавленных в избранное. Если таких
-        рецепров нет возвращает пустой лист.
-        """
-
-        try:
-            return super().get_queryset().get(user=user).recipes.all()
-        except ObjectDoesNotExist:
-            return []
-
     def get_tag_filtered(self, user, tags):
         """
-        Фукция возвращает QuerySet рецептов добавленных в избранное с учетом
-        активных тегов. Если таких рецепров нет возвращает пустой лист.
-        """
+        Получить отфильтрованные по тэгам рецепты.
 
+        Функция возвращает QuerySet рецептов добавленных в избранное с учетом
+        активных тегов. Если таких рецептов нет возвращает пустой лист.
+        """
         try:
             recipes = super().get_queryset().get(user=user).recipes.all()
             if tags:

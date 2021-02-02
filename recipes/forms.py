@@ -1,3 +1,4 @@
+"""Формы приложения Recipes."""
 from django import forms
 
 from recipes.models import Product, Recipe, Tag
@@ -15,6 +16,8 @@ class RecipeForm(forms.ModelForm):
     description = forms.CharField(required=True)
 
     class Meta:
+        """Определяем для формы модель, необходимые поля и виджеты."""
+
         model = Recipe
         fields = (
             'name', 'tags', 'cook_time', 'ingredients', 'description',
@@ -32,8 +35,7 @@ class RecipeForm(forms.ModelForm):
         }
 
     def clean_ingredients(self):
-        """Валидатор для ингридиентов"""
-
+        """Валидатор для ингредиентов."""
         ingredient_names = self.data.getlist('nameIngredient')
         ingredient_units = self.data.getlist('unitsIngredient')
         ingredient_amounts = self.data.getlist('valueIngredient')
@@ -51,29 +53,26 @@ class RecipeForm(forms.ModelForm):
                                           'unit': ingredient[1],
                                           'amount': ingredient[2]})
         if len(ingredients_clean) == 0:
-            raise forms.ValidationError('Добавте ингридиент')
+            raise forms.ValidationError('Добавьте ингредиент')
         return ingredients_clean
 
     def clean_name(self):
-        """Валидатор для названия рецептов"""
-
+        """Валидатор для названия рецептов."""
         data = self.cleaned_data['name']
         if len(data) == 0:
-            raise forms.ValidationError('Добавте название рецепта')
+            raise forms.ValidationError('Добавьте название рецепта')
         return data
 
     def clean_description(self):
-        """Валидатор для описания рецептов рецептов"""
-
+        """Валидатор для описания рецептов рецептов."""
         data = self.cleaned_data['description']
         if len(data) == 0:
-            raise forms.ValidationError('Добавте описание рецепта')
+            raise forms.ValidationError('Добавьте описание рецепта')
         return data
 
     def clean_tags(self):
-        """Валидатор для описания рецептов рецептов"""
-
+        """Валидатор для описания рецептов рецептов."""
         data = self.cleaned_data['tags']
         if len(data) == 0:
-            raise forms.ValidationError('Добавте тег')
+            raise forms.ValidationError('Добавьте тег')
         return data

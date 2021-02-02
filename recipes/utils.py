@@ -1,9 +1,9 @@
+"""Бизнес логика для приложения Recipes."""
 from recipes.models import Product, Ingredient
 
 
 def get_ingredients_from_form(ingredients, recipe):
-    """Получает ингридиенты рецепта из формы и возвращает их списком."""
-
+    """Получает ингредиенты рецепта из формы и возвращает их списком."""
     ingredients_for_save = []
     for ingredient in ingredients:
         product = Product.objects.get(title=ingredient['title'])

@@ -1,4 +1,4 @@
-![foodgram-project](https://github.com/KorsakovPV/foodgram-project/workflows/foodgram/badge.svg)
+[![foodgram-project](https://github.com/KorsakovPV/foodgram-project/workflows/foodgram/badge.svg)](https://github.com/KorsakovPV/foodgram-project/actions)
 
 # **Foodgram-project**
 
@@ -12,7 +12,7 @@ Foodgram - онлайн-сервис, где пользователи смогу
 
 ## Разворачивание проекта
 
-1.  Склонируйте проект
+1.  С клонируйте проект
 
         git clone https://github.com/KorsakovPV/foodgram-project
     

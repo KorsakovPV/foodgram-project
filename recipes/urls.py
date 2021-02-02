@@ -1,3 +1,4 @@
+"""URL приложения recipes."""
 from django.urls import path
 
 from recipes import views
