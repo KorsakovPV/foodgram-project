@@ -52,6 +52,7 @@ pytest==6.2.1
 pytest-django==3.10.0
 python-dateutil==2.8.1
 pytz==2020.4
+redis==3.5.3
 regex==2020.11.13
 six==1.15.0
 snowballstemmer==2.1.0
@@ -65,3 +66,4 @@ typing-extensions==3.7.4.3
 vine==5.0.0
 wcwidth==0.2.5
 zipp==3.4.0
+python-dotenv==0.13.0

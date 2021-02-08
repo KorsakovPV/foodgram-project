@@ -1,7 +1,10 @@
+from django.http import Http404
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 from .forms import CreationForm
+from .models import User
 
 
 class SignUp(CreateView):
@@ -17,3 +20,15 @@ class SignUp(CreateView):
         form_kwargs = super().get_form_kwargs()
         form_kwargs['request'] = self.request
         return form_kwargs
+
+
+# def verify(request, uuid):
+#     try:
+#         user = User.objects.get(verification_uuid=uuid, is_verified=False)
+#     except User.DoesNotExist:
+#         raise Http404("User does not exist or is already verified")
+#
+#     user.is_verified = True
+#     user.save()
+#
+#     return redirect('index_view')
