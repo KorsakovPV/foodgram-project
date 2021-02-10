@@ -15,6 +15,13 @@ services:
     env_file:
       - ./.env
 
+  redis:
+    image: redis
+    env_file:
+      - ./.env
+    ports:
+      - "6379"
+
   web:
 #    build: .
     image: korsakovpv/foodgram_project:latest
@@ -25,9 +32,9 @@ services:
       - ./media_volume:/code/media/
     depends_on:
       - db
+      - redis
     env_file:
       - ./.env
-
 
   nginx:
     image: nginx:1.19.3
