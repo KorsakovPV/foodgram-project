@@ -24,9 +24,9 @@ def send_verification_email(user_id):
     try:
         user = User.objects.get(id=user_id)
         # Send verification email
-        print('До сна')
-        time.sleep(10)
-        print('До отправки')
+        # print('До сна')
+        # time.sleep(20)
+        # print('До отправки')
         send_mail(
             subject='Регистрация на foodgram',
             message='Вы зарегестрировались на foodgram: http://localhost:8000%s' % reverse(
@@ -35,6 +35,6 @@ def send_verification_email(user_id):
             recipient_list=[user.email],
             fail_silently=False,
         )
-        print('После отправки')
+        # print('После отправки')
     except User.DoesNotExist:
         logging.warning("Tried to send verification email to non-existing user '%s'" % user_id)
