@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate, get_user_model, login
+from recipes.tasks import send_verification_email
 
 User = get_user_model()
 
@@ -26,7 +27,7 @@ class CreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         """
-        Переопледеляем метод для того чтоб после регистрации пользователь был
+        Переопределяем метод для того чтоб после регистрации пользователь был
         аутентифицирован
         """
 
@@ -39,4 +40,5 @@ class CreationForm(forms.ModelForm):
                 password=self.cleaned_data['password']
             )
             login(self.request, auth_user)
+            send_verification_email.delay(user.id)
         return user

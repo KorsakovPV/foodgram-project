@@ -34,6 +34,9 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
 
 INSTALLED_APPS = [
@@ -135,11 +138,7 @@ LOGIN_REDIRECT_URL = 'index_view'
 # Current site id
 SITE_ID = 2
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-
 # AUTHENTICATION_BACKENDS = 'django.contrib.auth.backends.ModelBackend'
-
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -150,4 +149,25 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 VERSION = '1.05'
+
+
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+# REDIS related settings
+REDIS_HOST = 'webserver'
+REDIS_PORT = '6379'
+BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+
 
