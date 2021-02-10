@@ -8,6 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT celery -A foodgram worker -l INFO
-
-CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
+CMD celery -A foodgram worker -l INFO && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
