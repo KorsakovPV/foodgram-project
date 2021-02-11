@@ -110,7 +110,7 @@ jobs:
             sudo docker rmi korsakovpv/foodgram_project -f
             sudo docker pull korsakovpv/foodgram_project
             sudo docker-compose up --force-recreate -d
-            sudo docker-compose -d exec web celery -A foodgram worker -l INFO
+            sudo docker-compose -T exec web celery -A foodgram worker -l INFO
 
 
   send_message:
