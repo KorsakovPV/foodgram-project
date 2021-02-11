@@ -74,6 +74,14 @@ jobs:
           SECRET_DB_HOST: ${{ secrets.DB_HOST }}
           SECRET_DB_PORT: ${{ secrets.DB_PORT }}
           SECRET_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SECRET_EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          SECRET_EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+          SECRET_EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          SECRET_EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          SECRET_EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
+          SECRET_EMAIL_USE_SSL: ${{ secrets.EMAIL_USE_SSL }}
+          SECRET_DEFAULT_FROM_EMAIL: ${{ secrets.DEFAULT_FROM_EMAIL }}
+
         run: |
           python -m pip install --upgrade pip
           pip install dump-env==1.2.0
