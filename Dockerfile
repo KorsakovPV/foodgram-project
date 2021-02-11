@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000 && celery -A foodgram worker -l INFO
+CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
