@@ -25,7 +25,7 @@ Foodgram - онлайн-сервис, где пользователи смогу
 
 3. Запускаем терминал внутри контейнера:
 
-        docker-compose exec web bash
+        docker-compose exec web bash #            sudo docker run -d -p 6379:6379 redis
 
    или для win систем
 
