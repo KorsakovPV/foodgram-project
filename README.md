@@ -27,8 +27,7 @@ Foodgram - онлайн-сервис, где пользователи смогу
 
         docker-compose exec web bash
    
-#            sudo docker run -d -p 6379:6379 redis
-            sudo docker-compose exec web celery -A foodgram worker -l INFO
+
 
    или для win систем
 
