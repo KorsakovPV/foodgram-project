@@ -98,9 +98,9 @@ jobs:
           script: |
             cd ~
             cd ./code
-            sudo docker rmi korsakovpv/foodgram_project -f
-            sudo docker pull korsakovpv/foodgram_project:latest
+            sudo docker pull korsakovpv/foodgram_project
             sudo docker-compose up --force-recreate -d web
+            sudo docker-compose exec web celery -A foodgram worker -l INFO
 
   send_message:
     runs-on: ubuntu-latest
