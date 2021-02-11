@@ -15,12 +15,12 @@ services:
     env_file:
       - ./.env
 
-#  redis:
-#    image: redis
-#    env_file:
-#      - ./.env
-#    ports:
-#      - "6379"
+  redis:
+    image: redis
+    env_file:
+      - ./.env
+    ports:
+      - "6379"
 
   web:
 #    build: .
@@ -32,7 +32,7 @@ services:
       - ./media_volume:/code/media/
     depends_on:
       - db
-#      - redis
+      - redis
     env_file:
       - ./.env
 

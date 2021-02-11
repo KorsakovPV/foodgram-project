@@ -98,7 +98,7 @@ jobs:
           script: |
             cd ~
             cd ./code
-            sudo docker run -d -p 6379:6379 redis
+#            sudo docker run -d -p 6379:6379 redis
             sudo docker rmi korsakovpv/foodgram_project -f
             sudo docker pull korsakovpv/foodgram_project:latest
             sudo docker-compose up --force-recreate -d web
