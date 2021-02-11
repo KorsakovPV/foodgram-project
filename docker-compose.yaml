@@ -17,6 +17,7 @@ services:
 
   redis:
     image: redis
+    container_name: redis
     env_file:
       - ./.env
     ports:
